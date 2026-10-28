@@ -35,6 +35,7 @@ export DB_PASSWORD=postgres
 - `V9__receipt_writeoff.sql`：新增收款单、收款核销明细。
 - `V10__purchase_chain.sql`：采购订单改审核状态，新增收货单、入库单、采购发票、应付单、付款单及核销明细；历史已入库订单迁移为收货/入库单。
 - `V11__outbound_line.sql`：新增销售出库明细 `so_outbound_line`，历史出库单按发货明细回填。
+- `V12__material_class_uom.sql`：新增物料分类 `md_material_class`、计量单位 `md_uom`，物料改为引用 `class_id`/`uom_id`，按原文本单位回填。
 
 核心表：`md_material`、`org_dept`、`org_staff`、`md_customer_class`、`md_supplier_class`、`md_currency`、`md_settle_method`、`md_pay_condition`、`md_customer`、`md_supplier`、`inv_warehouse`、`inv_balance`、`inv_ledger`、`so_order`、`so_order_line`、`po_order`、`po_order_line`。
 
@@ -89,7 +90,8 @@ pnpm build
 | 库存 | `/outbounds` | 销售出库单：单号、发货单、明细、过账时间 |
 | 库存 | `/ledger` | 库存流水：按物料/仓库/业务类型过滤，出入库合计 |
 | 库存 | `/warehouses` | 仓库 CRUD 与所属部门 |
-| 库存 | `/materials` | 物料分页、关键字查询、CRUD |
+| 库存 | `/materials` | 物料分页、关键字查询、按分类筛选、CRUD |
+| 库存 | `/material-master` | 物料分类与计量单位维护 |
 | 基础资料 | `/organization` | 部门树、员工档案 CRUD |
 | 基础资料 | `/partners` | 客户/供应商 CRUD，基础字典维护 |
 
@@ -102,6 +104,10 @@ pnpm build
 | GET | `/actuator/health` | 健康检查，包含数据库状态 |
 | GET | `/api/materials?current=1&size=10&keyword=` | 分页/关键字查询 |
 | GET | `/api/materials/{id}` | 按 ID 查询 |
+| GET/POST | `/api/material-classes` | 物料分类列表 / 新增 |
+| PUT/DELETE | `/api/material-classes/{id}` | 更新 / 删除物料分类 |
+| GET/POST | `/api/uoms` | 计量单位列表 / 新增 |
+| PUT/DELETE | `/api/uoms/{id}` | 更新 / 删除计量单位 |
 | POST | `/api/materials` | 新增物料 |
 | PUT | `/api/materials/{id}` | 更新物料（全量字段） |
 | DELETE | `/api/materials/{id}` | 删除物料 |
@@ -167,6 +173,7 @@ pnpm build
 - 客户被销售订单引用、供应商被采购订单引用时，数据库外键会阻止删除并返回 409。
 - 分类/币种/结算方式/付款条件支持完整 CRUD；分类禁止挂到自己的下级，被客商引用或存在子分类时不能删除。
 - 仓库必须归属部门；有库存余额或被销售/采购订单引用时不能删除。
+- 物料必须归属分类与计量单位；分类有子分类或被物料引用、单位被物料引用时不能删除。
 
 销售订单与发货规则：
 
