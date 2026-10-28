@@ -102,6 +102,11 @@ body {
   text-align: right;
 }
 
+.table-actions .ant-space {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
 .statistic-caption {
   margin-bottom: 4px;
   font-size: 14px;

@@ -7,6 +7,7 @@ import {
   Modal,
   Popconfirm,
   Segmented,
+  Select,
   Space,
   Table,
   Tag,
@@ -18,17 +19,20 @@ import { useState } from 'react'
 import {
   createMaterial,
   deleteMaterial,
+  listMaterialClasses,
   listMaterials,
+  listUoms,
   updateMaterial,
   type Material,
   type MaterialInput,
 } from '../api/materials'
 
-const defaultInput: MaterialInput = {
+const emptyInput: MaterialInput = {
   code: '',
   name: '',
   spec: '',
-  unit: 'PCS',
+  classId: 0,
+  uomId: 0,
   status: 1,
 }
 
@@ -41,20 +45,33 @@ export default function MaterialsPage() {
   const [size, setSize] = useState(10)
   const [keywordInput, setKeywordInput] = useState('')
   const [keyword, setKeyword] = useState('')
+  const [classFilter, setClassFilter] = useState<number | undefined>()
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<Material | null>(null)
 
   const materials = useQuery({
-    queryKey: ['materials', current, size, keyword],
-    queryFn: () => listMaterials({ current, size, keyword }),
+    queryKey: ['materials', current, size, keyword, classFilter],
+    queryFn: () => listMaterials({ current, size, keyword, classId: classFilter }),
     placeholderData: (previous) => previous,
   })
+  const classes = useQuery({
+    queryKey: ['material-classes'],
+    queryFn: listMaterialClasses,
+  })
+  const uoms = useQuery({ queryKey: ['uoms'], queryFn: listUoms })
+
+  const classOptions = (classes.data ?? []).map((item) => ({
+    value: item.id,
+    label: `${item.classCode} ${item.className}`,
+  }))
+  const uomOptions = (uoms.data ?? []).map((item) => ({
+    value: item.id,
+    label: `${item.unitName}（${item.unitCode}）`,
+  }))
 
   const saveMutation = useMutation({
     mutationFn: (values: MaterialInput) =>
-      editing
-        ? updateMaterial(editing.id, values)
-        : createMaterial(values),
+      editing ? updateMaterial(editing.id, values) : createMaterial(values),
     onSuccess: () => {
       message.success(editing ? '物料已更新' : '物料已创建')
       setOpen(false)
@@ -79,7 +96,11 @@ export default function MaterialsPage() {
   const openCreate = () => {
     setEditing(null)
     form.resetFields()
-    form.setFieldsValue(defaultInput)
+    form.setFieldsValue({
+      ...emptyInput,
+      classId: classOptions[0]?.value ?? 0,
+      uomId: uomOptions[0]?.value ?? 0,
+    })
     setOpen(true)
   }
 
@@ -89,7 +110,8 @@ export default function MaterialsPage() {
       code: record.code,
       name: record.name,
       spec: record.spec ?? '',
-      unit: record.unit,
+      classId: record.classId,
+      uomId: record.uomId,
       status: record.status,
     })
     setOpen(true)
@@ -115,13 +137,21 @@ export default function MaterialsPage() {
     {
       title: '规格',
       dataIndex: 'spec',
-      width: 160,
+      width: 150,
+      render: (value: string | null) => value || '-',
+    },
+    {
+      title: '分类',
+      dataIndex: 'className',
+      width: 120,
       render: (value: string | null) => value || '-',
     },
     {
       title: '单位',
-      dataIndex: 'unit',
-      width: 90,
+      dataIndex: 'unitName',
+      width: 110,
+      render: (value: string | null, record) =>
+        value ? `${value}${record.unitCode ? `（${record.unitCode}）` : ''}` : '-',
     },
     {
       title: '状态',
@@ -148,7 +178,7 @@ export default function MaterialsPage() {
           </Button>
           <Popconfirm
             title="删除该物料？"
-            description="删除后不可恢复。"
+            description="被业务单据引用时不能删除。"
             okText="删除"
             cancelText="取消"
             onConfirm={() => deleteMutation.mutate(record.id)}
@@ -168,10 +198,10 @@ export default function MaterialsPage() {
         <div>
           <Typography.Title level={3}>物料管理</Typography.Title>
           <Typography.Text type="secondary">
-            主数据维护，分页与关键字查询走 MyBatis-Plus。
+            物料归属分类与计量单位，单位小数位控制库存数量精度。
           </Typography.Text>
         </div>
-        <Space>
+        <Space wrap>
           <Input
             allowClear
             prefix={<SearchOutlined />}
@@ -182,7 +212,18 @@ export default function MaterialsPage() {
               setKeyword(keywordInput.trim())
               setCurrent(1)
             }}
-            style={{ width: 240 }}
+            style={{ width: 220 }}
+          />
+          <Select
+            allowClear
+            placeholder="全部分类"
+            style={{ width: 160 }}
+            value={classFilter}
+            onChange={(value: number | undefined) => {
+              setClassFilter(value)
+              setCurrent(1)
+            }}
+            options={classOptions}
           />
           <Button
             onClick={() => {
@@ -209,7 +250,7 @@ export default function MaterialsPage() {
         loading={materials.isLoading}
         columns={columns}
         dataSource={materials.data?.records ?? []}
-        scroll={{ x: 1000 }}
+        scroll={{ x: 1100 }}
         pagination={{
           current,
           pageSize: size,
@@ -233,7 +274,7 @@ export default function MaterialsPage() {
         cancelText="取消"
         destroyOnHidden
       >
-        <Form form={form} layout="vertical" initialValues={defaultInput}>
+        <Form form={form} layout="vertical">
           <Form.Item
             name="code"
             label="物料编码"
@@ -252,11 +293,18 @@ export default function MaterialsPage() {
             <Input maxLength={128} placeholder="如 30x40" />
           </Form.Item>
           <Form.Item
-            name="unit"
-            label="单位"
-            rules={[{ required: true, message: '请输入单位' }]}
+            name="classId"
+            label="物料分类"
+            rules={[{ required: true, message: '请选择物料分类' }]}
           >
-            <Input maxLength={16} placeholder="如 PCS / KG" />
+            <Select options={classOptions} placeholder="选择分类" />
+          </Form.Item>
+          <Form.Item
+            name="uomId"
+            label="计量单位"
+            rules={[{ required: true, message: '请选择计量单位' }]}
+          >
+            <Select options={uomOptions} placeholder="选择单位" />
           </Form.Item>
           <Form.Item name="status" label="状态">
             <Segmented

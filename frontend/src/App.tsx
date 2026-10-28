@@ -20,6 +20,7 @@ import InboundsPage from './pages/InboundsPage'
 import InvoicesPage from './pages/InvoicesPage'
 import LedgerPage from './pages/LedgerPage'
 import OutboundsPage from './pages/OutboundsPage'
+import MaterialMasterPage from './pages/MaterialMasterPage'
 import MaterialsPage from './pages/MaterialsPage'
 import OrganizationPage from './pages/OrganizationPage'
 import PartnersPage from './pages/PartnersPage'
@@ -45,6 +46,7 @@ const routes: { path: string; key: string }[] = [
   { path: '/sales', key: '/sales' },
   { path: '/organization', key: '/organization' },
   { path: '/materials', key: '/materials' },
+  { path: '/material-master', key: '/material-master' },
   { path: '/inventory', key: '/inventory' },
   { path: '/warehouses', key: '/warehouses' },
   { path: '/partners', key: '/partners' },
@@ -147,6 +149,11 @@ const menuItems: MenuProps['items'] = [
         icon: <DatabaseOutlined />,
         label: <NavLink to="/materials">物料管理</NavLink>,
       },
+      {
+        key: '/material-master',
+        icon: <ApartmentOutlined />,
+        label: <NavLink to="/material-master">分类与单位</NavLink>,
+      },
     ],
   },
   {
@@ -230,6 +237,7 @@ export default function App() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/organization" element={<OrganizationPage />} />
             <Route path="/materials" element={<MaterialsPage />} />
+            <Route path="/material-master" element={<MaterialMasterPage />} />
             <Route path="/sales" element={<SalesOrdersPage />} />
             <Route path="/deliveries" element={<DeliveriesPage />} />
             <Route path="/invoices" element={<InvoicesPage />} />

@@ -5,10 +5,6 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 
@@ -17,24 +13,11 @@ public class Material {
 
     @TableId(type = IdType.AUTO)
     private Long id;
-
-    @NotBlank(message = "物料编码不能为空")
-    @Size(max = 32, message = "物料编码不能超过 32 个字符")
     private String code;
-
-    @NotBlank(message = "物料名称不能为空")
-    @Size(max = 128, message = "物料名称不能超过 128 个字符")
     private String name;
-
-    @Size(max = 128, message = "规格不能超过 128 个字符")
     private String spec;
-
-    @NotBlank(message = "单位不能为空")
-    @Size(max = 16, message = "单位不能超过 16 个字符")
-    private String unit;
-
-    @Min(value = 0, message = "状态只能是 0 或 1")
-    @Max(value = 1, message = "状态只能是 0 或 1")
+    private Long classId;
+    private Long uomId;
     private Integer status;
 
     @TableField(value = "created_at", fill = FieldFill.INSERT)
@@ -75,12 +58,20 @@ public class Material {
         this.spec = spec;
     }
 
-    public String getUnit() {
-        return unit;
+    public Long getClassId() {
+        return classId;
     }
 
-    public void setUnit(String unit) {
-        this.unit = unit;
+    public void setClassId(Long classId) {
+        this.classId = classId;
+    }
+
+    public Long getUomId() {
+        return uomId;
+    }
+
+    public void setUomId(Long uomId) {
+        this.uomId = uomId;
     }
 
     public Integer getStatus() {
