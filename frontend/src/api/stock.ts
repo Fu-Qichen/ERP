@@ -104,6 +104,56 @@ export function getInbound(id: number) {
   return request<Inbound>(`/api/inbounds/${id}`)
 }
 
+export interface ReconcileRow {
+  materialId: number
+  materialCode: string
+  materialName: string
+  warehouseId: number
+  warehouseName: string
+  balanceQty: string
+  ledgerQty: string
+  diffQty: string
+  status: 'MATCHED' | 'DIFF'
+}
+
+export function ledgerExportUrl(params: {
+  materialId?: number
+  warehouseId?: number
+  bizType?: string
+  keyword?: string
+}) {
+  const query = new URLSearchParams()
+  if (params.materialId !== undefined) {
+    query.set('materialId', String(params.materialId))
+  }
+  if (params.warehouseId !== undefined) {
+    query.set('warehouseId', String(params.warehouseId))
+  }
+  if (params.bizType) {
+    query.set('bizType', params.bizType)
+  }
+  if (params.keyword) {
+    query.set('keyword', params.keyword)
+  }
+  const suffix = query.toString()
+  return `/api/ledger/export${suffix ? `?${suffix}` : ''}`
+}
+
+export function listReconcile(params: {
+  warehouseId?: number
+  onlyDiff?: boolean
+}) {
+  const query = new URLSearchParams()
+  if (params.warehouseId !== undefined) {
+    query.set('warehouseId', String(params.warehouseId))
+  }
+  if (params.onlyDiff) {
+    query.set('onlyDiff', 'true')
+  }
+  const suffix = query.toString()
+  return request<ReconcileRow[]>(`/api/reconcile${suffix ? `?${suffix}` : ''}`)
+}
+
 export function listLedger(params: {
   current: number
   size: number

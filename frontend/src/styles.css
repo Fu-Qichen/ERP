@@ -102,6 +102,63 @@ body {
   text-align: right;
 }
 
+.print-page {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: 100vh;
+}
+
+.print-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  max-width: 900px;
+  margin: 0 auto 16px;
+}
+
+.print-sheet {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.print-sheet h1 {
+  margin: 0 0 20px;
+  font-size: 22px;
+  text-align: center;
+  letter-spacing: 4px;
+}
+
+.print-sign {
+  display: flex;
+  gap: 48px;
+  margin-top: 28px;
+  font-size: 13px;
+}
+
+@media print {
+  .print-page {
+    padding: 0;
+    background: #fff;
+  }
+
+  .print-actions {
+    display: none;
+  }
+
+  .print-sheet {
+    max-width: none;
+    padding: 0;
+    box-shadow: none;
+  }
+}
+
+.reconcile-diff-row > td {
+  background: #fff1f0 !important;
+}
+
 .table-actions .ant-space {
   flex-wrap: nowrap;
   white-space: nowrap;

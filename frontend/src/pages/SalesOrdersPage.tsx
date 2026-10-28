@@ -19,9 +19,10 @@ import {
   Typography,
   type TableColumnsType,
 } from 'antd'
-import { PlusOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons'
+import { PlusOutlined, PrinterOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons'
 import dayjs, { type Dayjs } from 'dayjs'
 import { useState } from 'react'
+import ApprovalTimeline from '../components/ApprovalTimeline'
 import { listMaterials } from '../api/materials'
 import { listCustomers, listWarehouses } from '../api/master'
 import {
@@ -561,7 +562,22 @@ export default function SalesOrdersPage() {
         title={detail.data?.orderNo ?? '订单详情'}
         open={detailId !== null}
         width={860}
-        footer={null}
+        footer={
+          detail.data ? (
+            <Space>
+              <Button onClick={() => setDetailId(null)}>关闭</Button>
+              <Button
+                type="primary"
+                icon={<PrinterOutlined />}
+                onClick={() =>
+                  window.open(`/print/sales-order/${detail.data?.id}`, '_blank')
+                }
+              >
+                打印订单
+              </Button>
+            </Space>
+          ) : null
+        }
         onCancel={() => setDetailId(null)}
         destroyOnHidden
       >
@@ -599,6 +615,8 @@ export default function SalesOrdersPage() {
               columns={lineColumns}
               dataSource={detail.data.lines ?? []}
             />
+            <Divider>审批记录</Divider>
+            <ApprovalTimeline bizType="SALES_ORDER" bizId={detail.data.id} />
           </>
         )}
       </Modal>

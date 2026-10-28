@@ -37,6 +37,8 @@ export DB_PASSWORD=postgres
 - `V11__outbound_line.sql`：新增销售出库明细 `so_outbound_line`，历史出库单按发货明细回填。
 - `V12__material_class_uom.sql`：新增物料分类 `md_material_class`、计量单位 `md_uom`，物料改为引用 `class_id`/`uom_id`，按原文本单位回填。
 - `V13__bom_work_order.sql`：新增 BOM、BOM 明细、生产工单、生产领料、生产报工。
+- `V14__opening_ledger_fix.sql`：补记期初库存流水，修正余额与流水差异。
+- `V15__approval.sql`：新增审批单与审批流水，历史已审核订单补录通过记录。
 
 核心表：`md_material`、`org_dept`、`org_staff`、`md_customer_class`、`md_supplier_class`、`md_currency`、`md_settle_method`、`md_pay_condition`、`md_customer`、`md_supplier`、`inv_warehouse`、`inv_balance`、`inv_ledger`、`so_order`、`so_order_line`、`po_order`、`po_order_line`。
 
@@ -79,6 +81,7 @@ pnpm build
 | 分组 | 页面 | 说明 |
 | --- | --- | --- |
 | 工作台 | `/` | 物料、销售、采购、库存实时统计 |
+| 审批 | `/approvals` | 审批中心：待审批、已处理、审批日志 |
 | 销售 | `/sales` | 销售订单：查询、新增、审核、关闭、详情 |
 | 销售 | `/deliveries` | 销售发货：按已审核订单发货、出库扣库存、生成出库单 |
 | 采购 | `/purchase` | 采购订单：查询、新增、审核、关闭、详情 |
@@ -91,7 +94,9 @@ pnpm build
 | 库存 | `/inventory` | 库存余额与缺货提示 |
 | 库存 | `/inbounds` | 采购入库单：单号、收货单、明细、过账时间 |
 | 库存 | `/outbounds` | 销售出库单：单号、发货单、明细、过账时间 |
-| 库存 | `/ledger` | 库存流水：按物料/仓库/业务类型过滤，出入库合计 |
+| 库存 | `/ledger` | 库存流水：按物料/仓库/业务类型过滤，出入库合计，导出 Excel |
+| 库存 | `/reconcile` | 库存对账：余额与流水汇总比对，差异标红 |
+| 打印 | `/print/sales-order/:id`、`/print/purchase-order/:id` | 单据打印页，隐藏菜单，直接浏览器打印 |
 | 库存 | `/warehouses` | 仓库 CRUD 与所属部门 |
 | 库存 | `/materials` | 物料分页、关键字查询、按分类筛选、CRUD |
 | 库存 | `/material-master` | 物料分类与计量单位维护 |
@@ -140,6 +145,12 @@ pnpm build
 | GET | `/api/inbounds?current=1&size=10&keyword=` | 采购入库单分页 |
 | GET | `/api/inbounds/{id}` | 采购入库单详情（含明细） |
 | GET | `/api/ledger?current=1&size=20&materialId=&warehouseId=&bizType=` | 库存流水分页 |
+| GET | `/api/ledger/export?materialId=&warehouseId=&bizType=&keyword=` | 导出库存流水 xlsx |
+| GET | `/api/reconcile?warehouseId=&onlyDiff=` | 余额与流水对账 |
+| GET | `/api/approvals?status=&bizType=&keyword=` | 审批单分页 |
+| POST | `/api/approvals/{id}/decide` | 审批通过/驳回 |
+| GET | `/api/approvals/logs?bizType=&bizId=` | 单据审批日志 |
+| POST | `/api/sales-orders/{id}/decide`、`/api/purchase-orders/{id}/decide` | 按单据审批 |
 | GET/POST | `/api/boms` | BOM 分页 / 新增 |
 | GET/PUT/DELETE | `/api/boms/{id}` | BOM 详情 / 更新 / 删除 |
 | POST | `/api/boms/{id}/status?status=` | BOM 启用停用 |
@@ -211,6 +222,19 @@ pnpm build
 - 核销前对每张应收单 `SELECT ... FOR UPDATE`，并用 `WHERE balance >= amount` 原子更新，超额核销返回 409。
 - 核销后 `paid_amount += 核销额`、`balance -= 核销额`；`balance=0` 置为已结清，部分核销置为部分收款。
 - 一次收款可核销多张应收单；并发核销同一张应收单只有一笔成功。
+
+审批规则：
+
+- 销售/采购订单点“审核”会生成待审批单并记录 `SUBMIT` 日志；同一单据在审批中不能重复提交。
+- 审批中心通过/驳回都写 `APPROVE` / `REJECT` 日志，审批人必填。
+- 驳回时审批单与业务单据同时回落：订单退回草稿。
+- 审批单只能处理一次，重复审批返回 409。
+
+库存对账规则：
+
+- 按 `物料 + 仓库` 比对 `inv_balance.qty` 与 `inv_ledger` 的 `SUM(direction * qty)`。
+- 只有余额记录或只有流水记录的组合都会出现在结果中，差异非 0 标红。
+- 期初库存必须补流水（`V14` 已修正历史差异），否则对账必然不平。
 
 生产与 BOM 规则：
 

@@ -2,6 +2,7 @@ package com.jxbs.erp.demo.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jxbs.erp.demo.domain.view.PurchaseOrderView;
+import com.jxbs.erp.demo.dto.ApprovalDecisionRequest;
 import com.jxbs.erp.demo.dto.PurchaseOrderCreateRequest;
 import com.jxbs.erp.demo.service.PurchaseOrderService;
 import jakarta.validation.Valid;
@@ -52,5 +53,11 @@ public class PurchaseOrderController {
     @PostMapping("/{id}/close")
     public PurchaseOrderView close(@PathVariable Long id) {
         return purchaseOrderService.close(id);
+    }
+
+    @PostMapping("/{id}/decide")
+    public PurchaseOrderView decide(@PathVariable Long id,
+                                    @Valid @RequestBody ApprovalDecisionRequest request) {
+        return purchaseOrderService.decide(id, request);
     }
 }

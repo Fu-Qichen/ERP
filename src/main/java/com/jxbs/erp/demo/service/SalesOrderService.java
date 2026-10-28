@@ -9,6 +9,7 @@ import com.jxbs.erp.demo.domain.SalesOrder;
 import com.jxbs.erp.demo.domain.SalesOrderLine;
 import com.jxbs.erp.demo.domain.Warehouse;
 import com.jxbs.erp.demo.domain.view.SalesOrderView;
+import com.jxbs.erp.demo.dto.ApprovalDecisionRequest;
 import com.jxbs.erp.demo.dto.SalesOrderCreateRequest;
 import com.jxbs.erp.demo.dto.SalesOrderLineRequest;
 import com.jxbs.erp.demo.exception.BusinessException;
@@ -39,17 +40,20 @@ public class SalesOrderService {
     private final MaterialMapper materialMapper;
     private final CustomerMapper customerMapper;
     private final WarehouseMapper warehouseMapper;
+    private final ApprovalService approvalService;
 
     public SalesOrderService(SalesOrderMapper orderMapper,
                              SalesOrderLineMapper lineMapper,
                              MaterialMapper materialMapper,
                              CustomerMapper customerMapper,
-                             WarehouseMapper warehouseMapper) {
+                             WarehouseMapper warehouseMapper,
+                             ApprovalService approvalService) {
         this.orderMapper = orderMapper;
         this.lineMapper = lineMapper;
         this.materialMapper = materialMapper;
         this.customerMapper = customerMapper;
         this.warehouseMapper = warehouseMapper;
+        this.approvalService = approvalService;
     }
 
     public IPage<SalesOrderView> page(long current, long size, String keyword, Integer status) {
@@ -127,7 +131,7 @@ public class SalesOrderService {
     }
 
     /**
-     * 审核订单：只改状态，不动库存。库存扣减发生在销售出库。
+     * 审核订单：发起审批并记录审批日志。审批通过后订单才进入已审核状态。
      */
     @Transactional
     public SalesOrderView audit(Long id) {
@@ -142,9 +146,35 @@ public class SalesOrderService {
                 Wrappers.<SalesOrderLine>lambdaQuery().eq(SalesOrderLine::getOrderId, id)) == 0) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "订单没有明细");
         }
+
+        approvalService.submit(
+                ApprovalService.SALES_ORDER,
+                order.getId(),
+                order.getOrderNo(),
+                order.getTotalAmount(),
+                "system",
+                "提交审核"
+        );
         if (orderMapper.markAudited(id) == 0) {
             throw new BusinessException(HttpStatus.CONFLICT, "订单状态已变化，请刷新后重试");
         }
+        return detail(id);
+    }
+
+    /**
+     * 审批决定：驳回时把订单退回草稿。
+     */
+    @Transactional
+    public SalesOrderView decide(Long id, ApprovalDecisionRequest request) {
+        SalesOrder order = orderMapper.selectByIdForUpdate(id);
+        if (order == null) {
+            throw new BusinessException(HttpStatus.NOT_FOUND, "销售订单不存在");
+        }
+        var approval = approvalService.latest(ApprovalService.SALES_ORDER, order.getId());
+        if (approval == null) {
+            throw new BusinessException(HttpStatus.CONFLICT, "该订单尚未提交审批");
+        }
+        approvalService.decide(approval.getId(), request);
         return detail(id);
     }
 

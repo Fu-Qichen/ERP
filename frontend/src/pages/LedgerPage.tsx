@@ -12,11 +12,11 @@ import {
   Typography,
   type TableColumnsType,
 } from 'antd'
-import { FileSearchOutlined, ReloadOutlined } from '@ant-design/icons'
+import { DownloadOutlined, FileSearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 import { listMaterials } from '../api/materials'
 import { listWarehouses } from '../api/master'
-import { listLedger, type LedgerEntry } from '../api/stock'
+import { listLedger, ledgerExportUrl, type LedgerEntry } from '../api/stock'
 
 const bizLabels: Record<string, { color: string; label: string }> = {
   PURCHASE_IN: { color: 'success', label: '采购入库' },
@@ -114,6 +114,16 @@ export default function LedgerPage() {
     setCurrent(1)
   }
 
+  const exportFile = () => {
+    const url = ledgerExportUrl({
+      materialId,
+      warehouseId,
+      bizType,
+      keyword: keyword || undefined,
+    })
+    window.open(url, '_blank')
+  }
+
   return (
     <div className="page">
       <div className="page-heading">
@@ -189,6 +199,9 @@ export default function LedgerPage() {
             查询
           </Button>
           <Button onClick={resetFilters}>重置</Button>
+          <Button icon={<DownloadOutlined />} onClick={exportFile}>
+            导出 Excel
+          </Button>
           <Button
             icon={<ReloadOutlined />}
             onClick={() => ledger.refetch()}

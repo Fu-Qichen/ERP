@@ -35,6 +35,13 @@ public interface PurchaseOrderMapper extends BaseMapper<PurchaseOrder> {
             """)
     int markClosed(@Param("id") Long id);
 
+    @Update("""
+            UPDATE po_order
+            SET status = 0, updated_at = now()
+            WHERE id = #{id} AND status = 1
+            """)
+    int markDraft(@Param("id") Long id);
+
     @Select("""
             <script>
             SELECT o.id,

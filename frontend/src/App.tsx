@@ -1,6 +1,7 @@
 import {
   ApartmentOutlined,
   AppstoreOutlined,
+  AuditOutlined,
   DatabaseOutlined,
   ExperimentOutlined,
   FileTextOutlined,
@@ -14,6 +15,7 @@ import {
 } from '@ant-design/icons'
 import { Layout, Menu, Typography, type MenuProps } from 'antd'
 import { Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom'
+import ApprovalsPage from './pages/ApprovalsPage'
 import BomPage from './pages/BomPage'
 import DashboardPage from './pages/DashboardPage'
 import DeliveriesPage from './pages/DeliveriesPage'
@@ -27,9 +29,11 @@ import MaterialsPage from './pages/MaterialsPage'
 import OrganizationPage from './pages/OrganizationPage'
 import PartnersPage from './pages/PartnersPage'
 import PurchaseFinancePage from './pages/PurchaseFinancePage'
+import PrintPage from './pages/PrintPage'
 import PurchaseOrdersPage from './pages/PurchaseOrdersPage'
 import PurchaseReceiptsPage from './pages/PurchaseReceiptsPage'
 import ReceiptsPage from './pages/ReceiptsPage'
+import ReconcilePage from './pages/ReconcilePage'
 import SalesOrdersPage from './pages/SalesOrdersPage'
 import WarehousesPage from './pages/WarehousesPage'
 import WorkOrdersPage from './pages/WorkOrdersPage'
@@ -38,11 +42,13 @@ const { Header, Sider, Content } = Layout
 
 const routes: { path: string; key: string }[] = [
   { path: '/work-orders', key: '/work-orders' },
+  { path: '/approvals', key: '/approvals' },
   { path: '/boms', key: '/boms' },
   { path: '/purchase-receipts', key: '/purchase-receipts' },
   { path: '/inbounds', key: '/inbounds' },
   { path: '/outbounds', key: '/outbounds' },
   { path: '/ledger', key: '/ledger' },
+  { path: '/reconcile', key: '/reconcile' },
   { path: '/purchase-finance', key: '/purchase-finance' },
   { path: '/purchase', key: '/purchase' },
   { path: '/deliveries', key: '/deliveries' },
@@ -62,6 +68,11 @@ const menuItems: MenuProps['items'] = [
     key: '/',
     icon: <AppstoreOutlined />,
     label: <NavLink to="/">工作台</NavLink>,
+  },
+  {
+    key: '/approvals',
+    icon: <AuditOutlined />,
+    label: <NavLink to="/approvals">审批中心</NavLink>,
   },
   {
     key: 'sales',
@@ -162,6 +173,11 @@ const menuItems: MenuProps['items'] = [
         label: <NavLink to="/ledger">库存流水</NavLink>,
       },
       {
+        key: '/reconcile',
+        icon: <AuditOutlined />,
+        label: <NavLink to="/reconcile">库存对账</NavLink>,
+      },
+      {
         key: '/warehouses',
         icon: <HomeOutlined />,
         label: <NavLink to="/warehouses">仓库管理</NavLink>,
@@ -229,6 +245,15 @@ export default function App() {
   const selectedKey = findSelectedKey(location.pathname)
   const openKeys = findOpenKeys(location.pathname)
 
+  if (location.pathname.startsWith('/print/')) {
+    return (
+      <Routes>
+        <Route path="/print/:type/:id" element={<PrintPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    )
+  }
+
   return (
     <Layout className="app-shell">
       <Sider width={208} theme="dark" className="app-sider">
@@ -266,6 +291,7 @@ export default function App() {
             <Route path="/receipts" element={<ReceiptsPage />} />
             <Route path="/boms" element={<BomPage />} />
             <Route path="/work-orders" element={<WorkOrdersPage />} />
+            <Route path="/approvals" element={<ApprovalsPage />} />
             <Route path="/purchase" element={<PurchaseOrdersPage />} />
             <Route path="/purchase-receipts" element={<PurchaseReceiptsPage />} />
             <Route path="/purchase-finance" element={<PurchaseFinancePage />} />
@@ -273,6 +299,7 @@ export default function App() {
             <Route path="/inbounds" element={<InboundsPage />} />
             <Route path="/outbounds" element={<OutboundsPage />} />
             <Route path="/ledger" element={<LedgerPage />} />
+            <Route path="/reconcile" element={<ReconcilePage />} />
             <Route path="/warehouses" element={<WarehousesPage />} />
             <Route path="/partners" element={<PartnersPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />

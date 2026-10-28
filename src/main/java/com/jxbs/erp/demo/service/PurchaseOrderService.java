@@ -9,6 +9,7 @@ import com.jxbs.erp.demo.domain.PurchaseOrderLine;
 import com.jxbs.erp.demo.domain.Supplier;
 import com.jxbs.erp.demo.domain.Warehouse;
 import com.jxbs.erp.demo.domain.view.PurchaseOrderView;
+import com.jxbs.erp.demo.dto.ApprovalDecisionRequest;
 import com.jxbs.erp.demo.dto.PurchaseOrderCreateRequest;
 import com.jxbs.erp.demo.dto.PurchaseOrderLineRequest;
 import com.jxbs.erp.demo.exception.BusinessException;
@@ -39,17 +40,20 @@ public class PurchaseOrderService {
     private final SupplierMapper supplierMapper;
     private final WarehouseMapper warehouseMapper;
     private final MaterialMapper materialMapper;
+    private final ApprovalService approvalService;
 
     public PurchaseOrderService(PurchaseOrderMapper orderMapper,
                                 PurchaseOrderLineMapper lineMapper,
                                 SupplierMapper supplierMapper,
                                 WarehouseMapper warehouseMapper,
-                                MaterialMapper materialMapper) {
+                                MaterialMapper materialMapper,
+                                ApprovalService approvalService) {
         this.orderMapper = orderMapper;
         this.lineMapper = lineMapper;
         this.supplierMapper = supplierMapper;
         this.warehouseMapper = warehouseMapper;
         this.materialMapper = materialMapper;
+        this.approvalService = approvalService;
     }
 
     public IPage<PurchaseOrderView> page(long current, long size, String keyword, Integer status) {
@@ -142,9 +146,34 @@ public class PurchaseOrderService {
                 Wrappers.<PurchaseOrderLine>lambdaQuery().eq(PurchaseOrderLine::getOrderId, id)) == 0) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "采购订单没有明细");
         }
+        approvalService.submit(
+                ApprovalService.PURCHASE_ORDER,
+                order.getId(),
+                order.getOrderNo(),
+                order.getTotalAmount(),
+                "system",
+                "提交审核"
+        );
         if (orderMapper.markAudited(id) == 0) {
             throw new BusinessException(HttpStatus.CONFLICT, "采购订单状态已变化，请刷新后重试");
         }
+        return detail(id);
+    }
+
+    /**
+     * 审批决定：驳回时把采购订单退回草稿。
+     */
+    @Transactional
+    public PurchaseOrderView decide(Long id, ApprovalDecisionRequest request) {
+        PurchaseOrder order = orderMapper.selectByIdForUpdate(id);
+        if (order == null) {
+            throw new BusinessException(HttpStatus.NOT_FOUND, "采购订单不存在");
+        }
+        var approval = approvalService.latest(ApprovalService.PURCHASE_ORDER, order.getId());
+        if (approval == null) {
+            throw new BusinessException(HttpStatus.CONFLICT, "该采购订单尚未提交审批");
+        }
+        approvalService.decide(approval.getId(), request);
         return detail(id);
     }
 
