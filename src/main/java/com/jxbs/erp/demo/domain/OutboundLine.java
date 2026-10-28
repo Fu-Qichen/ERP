@@ -14,6 +14,7 @@ public class OutboundLine {
     private Long outboundId;
     private Long deliveryLineId;
     private Long materialId;
+    private Long batchId;
     private BigDecimal quantity;
     private BigDecimal taxUnitPrice;
     private BigDecimal amount;
@@ -48,6 +49,14 @@ public class OutboundLine {
 
     public void setMaterialId(Long materialId) {
         this.materialId = materialId;
+    }
+
+    public Long getBatchId() {
+        return batchId;
+    }
+
+    public void setBatchId(Long batchId) {
+        this.batchId = batchId;
     }
 
     public BigDecimal getQuantity() {

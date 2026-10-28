@@ -6,6 +6,8 @@ export interface DeliveryLine {
   materialId: number
   materialCode: string
   materialName: string
+  batchId: number | null
+  batchNo: string | null
   quantity: string
 }
 
@@ -31,6 +33,7 @@ export interface Delivery {
 export interface DeliveryLineInput {
   orderLineId: number
   quantity: number
+  batchId?: number
 }
 
 export interface DeliveryInput {

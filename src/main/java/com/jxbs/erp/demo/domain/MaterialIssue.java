@@ -16,6 +16,7 @@ public class MaterialIssue {
     private Long workOrderId;
     private Long warehouseId;
     private Long materialId;
+    private Long batchId;
     private BigDecimal qty;
     private LocalDateTime createdAt;
 
@@ -57,6 +58,14 @@ public class MaterialIssue {
 
     public void setMaterialId(Long materialId) {
         this.materialId = materialId;
+    }
+
+    public Long getBatchId() {
+        return batchId;
+    }
+
+    public void setBatchId(Long batchId) {
+        this.batchId = batchId;
     }
 
     public BigDecimal getQty() {

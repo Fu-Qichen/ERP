@@ -11,6 +11,7 @@ export interface Material {
   uomId: number
   unitCode: string | null
   unitName: string | null
+  batchMode: number
   status: number
   createdAt: string
   updatedAt: string
@@ -23,6 +24,7 @@ export interface MaterialInput {
   classId: number
   uomId: number
   status?: number
+  batchMode?: number
 }
 
 export interface MaterialClass {

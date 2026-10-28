@@ -11,6 +11,8 @@ public record DeliveryLineRequest(
 
         @NotNull(message = "发货数量不能为空")
         @DecimalMin(value = "0.000001", message = "发货数量必须大于 0")
-        BigDecimal quantity
+        BigDecimal quantity,
+
+        Long batchId
 ) {
 }

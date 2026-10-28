@@ -24,7 +24,8 @@ public class LedgerController {
                                   @RequestParam(required = false) Long materialId,
                                   @RequestParam(required = false) Long warehouseId,
                                   @RequestParam(required = false) String bizType,
+                                  @RequestParam(required = false) Long batchId,
                                   @RequestParam(required = false) String keyword) {
-        return ledgerService.page(current, size, materialId, warehouseId, bizType, keyword);
+        return ledgerService.page(current, size, materialId, warehouseId, bizType, batchId, keyword);
     }
 }

@@ -3,6 +3,7 @@ package com.jxbs.erp.demo.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.jxbs.erp.demo.domain.Batch;
 import com.jxbs.erp.demo.domain.Material;
 import com.jxbs.erp.demo.domain.PurchaseInbound;
 import com.jxbs.erp.demo.domain.PurchaseInboundLine;
@@ -50,6 +51,7 @@ public class PurchaseReceiptService {
     private final InventoryBalanceMapper balanceMapper;
     private final StockLedgerMapper ledgerMapper;
     private final MaterialMapper materialMapper;
+    private final BatchService batchService;
 
     public PurchaseReceiptService(PurchaseReceiptMapper receiptMapper,
                                   PurchaseReceiptLineMapper receiptLineMapper,
@@ -59,7 +61,8 @@ public class PurchaseReceiptService {
                                   PurchaseOrderLineMapper orderLineMapper,
                                   InventoryBalanceMapper balanceMapper,
                                   StockLedgerMapper ledgerMapper,
-                                  MaterialMapper materialMapper) {
+                                  MaterialMapper materialMapper,
+                                  BatchService batchService) {
         this.receiptMapper = receiptMapper;
         this.receiptLineMapper = receiptLineMapper;
         this.inboundMapper = inboundMapper;
@@ -69,6 +72,7 @@ public class PurchaseReceiptService {
         this.balanceMapper = balanceMapper;
         this.ledgerMapper = ledgerMapper;
         this.materialMapper = materialMapper;
+        this.batchService = batchService;
     }
 
     public IPage<PurchaseReceiptView> page(long current, long size, String keyword, Integer status) {
@@ -134,6 +138,13 @@ public class PurchaseReceiptService {
             line.setReceiptId(receipt.getId());
             line.setOrderLineId(orderLine.getId());
             line.setMaterialId(orderLine.getMaterialId());
+            if (lineRequest.batchId() != null) {
+                Batch batch = batchService.requireForIssue(orderLine.getMaterialId(), lineRequest.batchId());
+                line.setBatchId(batch == null ? null : batch.getId());
+            } else if (lineRequest.batchNo() != null && !lineRequest.batchNo().isBlank()) {
+                Batch batch = batchService.resolveForStock(orderLine.getMaterialId(), lineRequest.batchNo(), "GR", null);
+                line.setBatchId(batch == null ? null : batch.getId());
+            }
             line.setQuantity(lineRequest.quantity());
             line.setTaxUnitPrice(orderLine.getTaxUnitPrice());
             line.setTaxRate(orderLine.getTaxRate());
@@ -177,17 +188,20 @@ public class PurchaseReceiptService {
         inboundMapper.insert(inbound);
 
         for (PurchaseReceiptLine line : lines) {
-            balanceMapper.addStock(line.getMaterialId(), receipt.getWarehouseId(), line.getQuantity());
+            Long batchId = line.getBatchId();
+            balanceMapper.addStock(line.getMaterialId(), receipt.getWarehouseId(), batchId, line.getQuantity());
 
             PurchaseInboundLine inboundLine = new PurchaseInboundLine();
             inboundLine.setInboundId(inbound.getId());
             inboundLine.setMaterialId(line.getMaterialId());
+            inboundLine.setBatchId(batchId);
             inboundLine.setQuantity(line.getQuantity());
             inboundLine.setTaxUnitPrice(line.getTaxUnitPrice());
             inboundLineMapper.insert(inboundLine);
 
             StockLedger ledger = new StockLedger();
             ledger.setMaterialId(line.getMaterialId());
+            ledger.setBatchId(batchId);
             ledger.setWarehouseId(receipt.getWarehouseId());
             ledger.setBizType("PURCHASE_IN");
             ledger.setDirection(1);

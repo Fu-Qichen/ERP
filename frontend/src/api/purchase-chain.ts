@@ -6,6 +6,8 @@ export interface PurchaseReceiptLine {
   materialId: number
   materialCode: string
   materialName: string
+  batchId: number | null
+  batchNo: string | null
   quantity: string
   taxUnitPrice: string
   taxRate: string
@@ -33,7 +35,7 @@ export interface PurchaseReceiptInput {
   orderId: number
   receiptDate: string
   remark?: string
-  lines: { orderLineId: number; quantity: number }[]
+  lines: { orderLineId: number; quantity: number; batchId?: number; batchNo?: string }[]
 }
 
 export interface PurchaseInvoiceLine {

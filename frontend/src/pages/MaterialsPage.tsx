@@ -34,6 +34,7 @@ const emptyInput: MaterialInput = {
   classId: 0,
   uomId: 0,
   status: 1,
+  batchMode: 0,
 }
 
 export default function MaterialsPage() {
@@ -113,6 +114,7 @@ export default function MaterialsPage() {
       classId: record.classId,
       uomId: record.uomId,
       status: record.status,
+      batchMode: record.batchMode,
     })
     setOpen(true)
   }
@@ -152,6 +154,13 @@ export default function MaterialsPage() {
       width: 110,
       render: (value: string | null, record) =>
         value ? `${value}${record.unitCode ? `（${record.unitCode}）` : ''}` : '-',
+    },
+    {
+      title: '批次管理',
+      dataIndex: 'batchMode',
+      width: 110,
+      render: (value: number) =>
+        value === 1 ? <Tag color="blue">批次</Tag> : <Tag>不管批次</Tag>,
     },
     {
       title: '状态',
@@ -305,6 +314,18 @@ export default function MaterialsPage() {
             rules={[{ required: true, message: '请选择计量单位' }]}
           >
             <Select options={uomOptions} placeholder="选择单位" />
+          </Form.Item>
+          <Form.Item
+            name="batchMode"
+            label="批次管理"
+            extra="启用后该物料的出入库必须指定批次，库存与流水按批次记账"
+          >
+            <Segmented
+              options={[
+                { label: '不管批次', value: 0 },
+                { label: '批次管理', value: 1 },
+              ]}
+            />
           </Form.Item>
           <Form.Item name="status" label="状态">
             <Segmented

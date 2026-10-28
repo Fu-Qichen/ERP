@@ -14,6 +14,7 @@ public class StockLedger {
     private Long id;
     private Long materialId;
     private Long warehouseId;
+    private Long batchId;
     private String bizType;
     private Integer direction;
     private BigDecimal qty;
@@ -60,6 +61,14 @@ public class StockLedger {
 
     public void setDirection(Integer direction) {
         this.direction = direction;
+    }
+
+    public Long getBatchId() {
+        return batchId;
+    }
+
+    public void setBatchId(Long batchId) {
+        this.batchId = batchId;
     }
 
     public BigDecimal getQty() {

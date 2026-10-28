@@ -16,6 +16,7 @@ public class ProductionReport {
     private Long workOrderId;
     private Long warehouseId;
     private Long productId;
+    private Long batchId;
     private BigDecimal qty;
     private LocalDateTime createdAt;
 
@@ -57,6 +58,14 @@ public class ProductionReport {
 
     public void setProductId(Long productId) {
         this.productId = productId;
+    }
+
+    public Long getBatchId() {
+        return batchId;
+    }
+
+    public void setBatchId(Long batchId) {
+        this.batchId = batchId;
     }
 
     public BigDecimal getQty() {

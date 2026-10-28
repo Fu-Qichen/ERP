@@ -23,6 +23,7 @@ import {
 import { PlusOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons'
 import dayjs, { type Dayjs } from 'dayjs'
 import { useState } from 'react'
+import BatchSelect from '../components/BatchSelect'
 import { listMaterials } from '../api/materials'
 import { listWarehouses } from '../api/master'
 import {
@@ -51,7 +52,7 @@ interface WorkOrderFormValues {
 }
 
 interface IssueFormValues {
-  lines: { materialId: number; qty: number }[]
+  lines: { materialId: number; qty: number; batchId?: number }[]
 }
 
 const statusMeta: Record<number, { color: string; label: string }> = {
@@ -73,7 +74,7 @@ export default function WorkOrdersPage() {
   const queryClient = useQueryClient()
   const [form] = Form.useForm<WorkOrderFormValues>()
   const [issueForm] = Form.useForm<IssueFormValues>()
-  const [reportForm] = Form.useForm<{ qty: number }>()
+  const [reportForm] = Form.useForm<{ qty: number; batchNo?: string }>()
 
   const [current, setCurrent] = useState(1)
   const [size, setSize] = useState(10)
@@ -181,7 +182,8 @@ export default function WorkOrdersPage() {
   })
 
   const reportMutation = useMutation({
-    mutationFn: ({ id, qty }: { id: number; qty: number }) => reportWorkOrder(id, qty),
+    mutationFn: ({ id, qty, batchNo }: { id: number; qty: number; batchNo?: string }) =>
+      reportWorkOrder(id, qty, batchNo),
     onSuccess: () => {
       message.success('报工完成，成品已入库')
       setReportOpen(false)
@@ -235,7 +237,7 @@ export default function WorkOrdersPage() {
       return
     }
     const values = await reportForm.validateFields()
-    reportMutation.mutate({ id: activeOrder.id, qty: values.qty })
+    reportMutation.mutate({ id: activeOrder.id, qty: values.qty, batchNo: values.batchNo })
   }
 
   const columns: TableColumnsType<WorkOrder> = [
@@ -499,7 +501,7 @@ export default function WorkOrdersPage() {
               <>
                 {fields.map(({ key, name, ...restField }) => (
                   <Row key={key} gutter={8}>
-                    <Col span={14}>
+                    <Col span={8}>
                       <Form.Item
                         {...restField}
                         name={[name, 'materialId']}
@@ -507,6 +509,18 @@ export default function WorkOrdersPage() {
                         rules={[{ required: true, message: '请选择子件' }]}
                       >
                         <Select showSearch optionFilterProp="label" options={materialOptions} />
+                      </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'batchId']}
+                        label="批次（批次物料必填）"
+                      >
+                        <BatchSelect
+                          materialId={issueForm.getFieldValue(['lines', name, 'materialId'])}
+                          warehouseId={activeOrder?.warehouseId}
+                        />
                       </Form.Item>
                     </Col>
                     <Col span={7}>
@@ -559,6 +573,13 @@ export default function WorkOrdersPage() {
             rules={[{ required: true, message: '请输入完工数量' }]}
           >
             <InputNumber min={0.000001} precision={6} style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item
+            name="batchNo"
+            label="成品批次号"
+            extra="成品启用批次管理时必须填写；留空则自动按日期生成"
+          >
+            <Input placeholder="如 B20261101" maxLength={64} />
           </Form.Item>
         </Form>
       </Modal>

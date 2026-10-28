@@ -8,6 +8,8 @@ import java.math.BigDecimal;
 public record ReportRequest(
         @NotNull(message = "报工数量不能为空")
         @DecimalMin(value = "0.000001", message = "报工数量必须大于 0")
-        BigDecimal qty
+        BigDecimal qty,
+
+        String batchNo
 ) {
 }

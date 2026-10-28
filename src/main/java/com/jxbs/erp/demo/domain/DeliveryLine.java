@@ -15,6 +15,7 @@ public class DeliveryLine {
     private Long deliveryId;
     private Long orderLineId;
     private Long materialId;
+    private Long batchId;
     private BigDecimal quantity;
     private BigDecimal taxUnitPrice;
     private BigDecimal taxRate;
@@ -51,6 +52,14 @@ public class DeliveryLine {
 
     public void setMaterialId(Long materialId) {
         this.materialId = materialId;
+    }
+
+    public Long getBatchId() {
+        return batchId;
+    }
+
+    public void setBatchId(Long batchId) {
+        this.batchId = batchId;
     }
 
     public BigDecimal getQuantity() {

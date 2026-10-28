@@ -165,7 +165,7 @@ export function releaseWorkOrder(id: number) {
 
 export function issueWorkOrder(
   id: number,
-  lines: { materialId: number; qty: number }[],
+  lines: { materialId: number; qty: number; batchId?: number }[],
 ) {
   return request<WorkOrder>(`/api/work-orders/${id}/issue`, {
     method: 'POST',
@@ -173,10 +173,10 @@ export function issueWorkOrder(
   })
 }
 
-export function reportWorkOrder(id: number, qty: number) {
+export function reportWorkOrder(id: number, qty: number, batchNo?: string) {
   return request<WorkOrder>(`/api/work-orders/${id}/report`, {
     method: 'POST',
-    body: JSON.stringify({ qty }),
+    body: JSON.stringify({ qty, batchNo }),
   })
 }
 

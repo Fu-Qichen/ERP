@@ -29,18 +29,23 @@ public interface StockLedgerMapper extends BaseMapper<StockLedger> {
                        WHEN 'GR' THEN (SELECT receipt_no FROM po_receipt WHERE id = l.source_id)
                        ELSE NULL
                    END AS source_no,
+                   l.batch_id,
+                   bt.batch_no,
                    l.occurred_at,
                    l.remark
             FROM inv_ledger l
             JOIN md_material m ON m.id = l.material_id
             JOIN inv_warehouse w ON w.id = l.warehouse_id
+            LEFT JOIN inv_batch bt ON bt.id = l.batch_id
             WHERE 1 = 1
             <if test="materialId != null">AND l.material_id = #{materialId}</if>
             <if test="warehouseId != null">AND l.warehouse_id = #{warehouseId}</if>
             <if test="bizType != null and bizType != ''">AND l.biz_type = #{bizType}</if>
+            <if test="batchId != null">AND l.batch_id = #{batchId}</if>
             <if test="keyword != null and keyword != ''">
                 AND (m.code ILIKE CONCAT('%', #{keyword}, '%')
-                     OR m.name ILIKE CONCAT('%', #{keyword}, '%'))
+                     OR m.name ILIKE CONCAT('%', #{keyword}, '%')
+                     OR COALESCE(bt.batch_no, '') ILIKE CONCAT('%', #{keyword}, '%'))
             </if>
             ORDER BY l.id DESC
             </script>
@@ -49,5 +54,6 @@ public interface StockLedgerMapper extends BaseMapper<StockLedger> {
                                       @Param("materialId") Long materialId,
                                       @Param("warehouseId") Long warehouseId,
                                       @Param("bizType") String bizType,
+                                      @Param("batchId") Long batchId,
                                       @Param("keyword") String keyword);
 }

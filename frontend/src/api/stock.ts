@@ -62,6 +62,8 @@ export interface LedgerEntry {
   sourceType: string
   sourceId: number
   sourceNo: string | null
+  batchId: number | null
+  batchNo: string | null
   occurredAt: string
   remark: string | null
 }
@@ -110,6 +112,8 @@ export interface ReconcileRow {
   materialName: string
   warehouseId: number
   warehouseName: string
+  batchId: number | null
+  batchNo: string | null
   balanceQty: string
   ledgerQty: string
   diffQty: string
@@ -120,6 +124,7 @@ export function ledgerExportUrl(params: {
   materialId?: number
   warehouseId?: number
   bizType?: string
+  batchId?: number
   keyword?: string
 }) {
   const query = new URLSearchParams()
@@ -131,6 +136,9 @@ export function ledgerExportUrl(params: {
   }
   if (params.bizType) {
     query.set('bizType', params.bizType)
+  }
+  if (params.batchId !== undefined) {
+    query.set('batchId', String(params.batchId))
   }
   if (params.keyword) {
     query.set('keyword', params.keyword)
@@ -160,6 +168,7 @@ export function listLedger(params: {
   materialId?: number
   warehouseId?: number
   bizType?: string
+  batchId?: number
   keyword?: string
 }) {
   const query = new URLSearchParams({
@@ -174,6 +183,9 @@ export function listLedger(params: {
   }
   if (params.bizType) {
     query.set('bizType', params.bizType)
+  }
+  if (params.batchId !== undefined) {
+    query.set('batchId', String(params.batchId))
   }
   if (params.keyword) {
     query.set('keyword', params.keyword)

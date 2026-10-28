@@ -20,6 +20,13 @@ export default function InventoryPage() {
     { title: '物料名称', dataIndex: 'materialName', width: 200 },
     { title: '仓库', dataIndex: 'warehouseName', width: 120 },
     {
+      title: '批次',
+      dataIndex: 'batchNo',
+      width: 150,
+      render: (value: string | null) => value || <span style={{ color: '#bfbfbf' }}>-</span>,
+    },
+    { title: '到期日', dataIndex: 'expireDate', width: 120, render: (value: string | null) => value || '-' },
+    {
       title: '库存数量',
       dataIndex: 'qty',
       width: 140,
@@ -73,7 +80,7 @@ export default function InventoryPage() {
           columns={columns}
           dataSource={inventory.data ?? []}
           pagination={false}
-          scroll={{ x: 900 }}
+          scroll={{ x: 1160 }}
         />
       </Card>
     </div>

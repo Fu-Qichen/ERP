@@ -63,7 +63,7 @@ public class WorkOrderController {
 
     @PostMapping("/{id}/report")
     public WorkOrderView report(@PathVariable Long id, @Valid @RequestBody ReportRequest request) {
-        return workOrderService.report(id, request.qty());
+        return workOrderService.report(id, request.qty(), request.batchNo());
     }
 
     @GetMapping("/{id}/issues")

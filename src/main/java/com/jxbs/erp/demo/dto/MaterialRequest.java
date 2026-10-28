@@ -26,6 +26,10 @@ public record MaterialRequest(
 
         @Min(value = 0, message = "状态只能是 0 或 1")
         @Max(value = 1, message = "状态只能是 0 或 1")
-        Integer status
+        Integer status,
+
+        @Min(value = 0, message = "批次管理只能是 0、1 或 2")
+        @Max(value = 2, message = "批次管理只能是 0、1 或 2")
+        Integer batchMode
 ) {
 }

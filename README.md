@@ -39,6 +39,7 @@ export DB_PASSWORD=postgres
 - `V13__bom_work_order.sql`：新增 BOM、BOM 明细、生产工单、生产领料、生产报工。
 - `V14__opening_ledger_fix.sql`：补记期初库存流水，修正余额与流水差异。
 - `V15__approval.sql`：新增审批单与审批流水，历史已审核订单补录通过记录。
+- `V16__batch.sql`：新增批次档案 `inv_batch`、物料批次开关 `md_material.batch_mode`，余额与流水增加 `batch_id`，唯一键改为带批次，单据明细记录批次。
 
 核心表：`md_material`、`org_dept`、`org_staff`、`md_customer_class`、`md_supplier_class`、`md_currency`、`md_settle_method`、`md_pay_condition`、`md_customer`、`md_supplier`、`inv_warehouse`、`inv_balance`、`inv_ledger`、`so_order`、`so_order_line`、`po_order`、`po_order_line`。
 
@@ -95,7 +96,8 @@ pnpm build
 | 库存 | `/inbounds` | 采购入库单：单号、收货单、明细、过账时间 |
 | 库存 | `/outbounds` | 销售出库单：单号、发货单、明细、过账时间 |
 | 库存 | `/ledger` | 库存流水：按物料/仓库/业务类型过滤，出入库合计，导出 Excel |
-| 库存 | `/reconcile` | 库存对账：余额与流水汇总比对，差异标红 |
+| 库存 | `/reconcile` | 库存对账：按物料+仓库+批次比对余额与流水，差异标红 |
+| 库存 | `/batches` | 批次档案：批次号、生产/到期日、按仓库的可用库存、来源 |
 | 打印 | `/print/sales-order/:id`、`/print/purchase-order/:id` | 单据打印页，隐藏菜单，直接浏览器打印 |
 | 库存 | `/warehouses` | 仓库 CRUD 与所属部门 |
 | 库存 | `/materials` | 物料分页、关键字查询、按分类筛选、CRUD |
@@ -146,7 +148,10 @@ pnpm build
 | GET | `/api/inbounds/{id}` | 采购入库单详情（含明细） |
 | GET | `/api/ledger?current=1&size=20&materialId=&warehouseId=&bizType=` | 库存流水分页 |
 | GET | `/api/ledger/export?materialId=&warehouseId=&bizType=&keyword=` | 导出库存流水 xlsx |
-| GET | `/api/reconcile?warehouseId=&onlyDiff=` | 余额与流水对账 |
+| GET | `/api/reconcile?warehouseId=&onlyDiff=` | 余额与流水对账（按批次） |
+| GET | `/api/batches?materialId=&warehouseId=&keyword=` | 批次档案分页 |
+| GET | `/api/batches/available?materialId=&warehouseId=` | 可用批次，按先到期先出排序 |
+| POST/PUT | `/api/batches`、`/api/batches/{id}` | 新建 / 更新批次 |
 | GET | `/api/approvals?status=&bizType=&keyword=` | 审批单分页 |
 | POST | `/api/approvals/{id}/decide` | 审批通过/驳回 |
 | GET | `/api/approvals/logs?bizType=&bizId=` | 单据审批日志 |
@@ -235,6 +240,16 @@ pnpm build
 - 按 `物料 + 仓库` 比对 `inv_balance.qty` 与 `inv_ledger` 的 `SUM(direction * qty)`。
 - 只有余额记录或只有流水记录的组合都会出现在结果中，差异非 0 标红。
 - 期初库存必须补流水（`V14` 已修正历史差异），否则对账必然不平。
+
+批次规则：
+
+- 物料 `batch_mode`：0 不管批次、1 批次管理、2 序列号管理（当前只实现 1）。
+- 启用批次后，出入库必须指定批次：不带批次返回 400，批次不属于该物料返回 400。
+- 未启用批次的物料不能指定批次，库存仍为「物料+仓库」单行。
+- 收货可填批次号，不存在则自动建档；来源记为 `GR`，报工建档来源记为 `WO`。
+- 出库/领料按批次扣减，批次余额不足返回 409，与总库存不足区分。
+- 余额唯一键是 `(material_id, warehouse_id, COALESCE(batch_id, 0))`，非批次物料占位 0。
+- 对账按批次分组，`V16` 已把历史余额与期初流水挂到最早到期批次上。
 
 生产与 BOM 规则：
 

@@ -35,12 +35,14 @@ public class StockReportService {
     public byte[] exportLedger(Long materialId,
                                Long warehouseId,
                                String bizType,
+                               Long batchId,
                                String keyword) {
         IPage<LedgerView> page = ledgerMapper.selectPageViews(
                 new Page<>(1, 50000),
                 materialId,
                 warehouseId,
                 bizType,
+                batchId,
                 keyword
         );
         List<LedgerView> rows = page.getRecords();
@@ -51,7 +53,7 @@ public class StockReportService {
             CellStyle bold = workbook.createCellStyle();
             bold.setFont(boldFont(workbook));
 
-            String[] headers = {"发生时间", "物料编码", "物料名称", "仓库", "业务类型",
+            String[] headers = {"发生时间", "物料编码", "物料名称", "仓库", "批次", "业务类型",
                     "方向", "数量", "来源单据", "备注"};
             Row header = sheet.createRow(0);
             for (int i = 0; i < headers.length; i++) {
@@ -68,15 +70,16 @@ public class StockReportService {
                 line.createCell(1).setCellValue(row.getMaterialCode());
                 line.createCell(2).setCellValue(row.getMaterialName());
                 line.createCell(3).setCellValue(row.getWarehouseName());
-                line.createCell(4).setCellValue(bizLabel(row.getBizType()));
-                line.createCell(5).setCellValue(row.getDirection() > 0 ? "入库" : "出库");
-                Cell qtyCell = line.createCell(6);
+                line.createCell(4).setCellValue(row.getBatchNo() == null ? "" : row.getBatchNo());
+                line.createCell(5).setCellValue(bizLabel(row.getBizType()));
+                line.createCell(6).setCellValue(row.getDirection() > 0 ? "入库" : "出库");
+                Cell qtyCell = line.createCell(7);
                 qtyCell.setCellValue(row.getQty() == null ? 0 : row.getQty().doubleValue());
-                line.createCell(7).setCellValue(row.getSourceNo() == null ? "" : row.getSourceNo());
-                line.createCell(8).setCellValue(row.getRemark() == null ? "" : row.getRemark());
+                line.createCell(8).setCellValue(row.getSourceNo() == null ? "" : row.getSourceNo());
+                line.createCell(9).setCellValue(row.getRemark() == null ? "" : row.getRemark());
             }
 
-            int[] widths = {20, 14, 22, 10, 14, 8, 12, 20, 40};
+            int[] widths = {20, 14, 22, 10, 18, 14, 8, 12, 20, 40};
             for (int i = 0; i < widths.length; i++) {
                 sheet.setColumnWidth(i, widths[i] * 256);
             }

@@ -13,6 +13,7 @@ public class PurchaseInboundLine {
     private Long id;
     private Long inboundId;
     private Long materialId;
+    private Long batchId;
     private BigDecimal quantity;
     private BigDecimal taxUnitPrice;
 
@@ -38,6 +39,14 @@ public class PurchaseInboundLine {
 
     public void setMaterialId(Long materialId) {
         this.materialId = materialId;
+    }
+
+    public Long getBatchId() {
+        return batchId;
+    }
+
+    public void setBatchId(Long batchId) {
+        this.batchId = batchId;
     }
 
     public BigDecimal getQuantity() {

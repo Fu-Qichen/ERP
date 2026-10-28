@@ -3,6 +3,7 @@ package com.jxbs.erp.demo.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.jxbs.erp.demo.domain.Batch;
 import com.jxbs.erp.demo.domain.Delivery;
 import com.jxbs.erp.demo.domain.DeliveryLine;
 import com.jxbs.erp.demo.domain.Material;
@@ -50,6 +51,7 @@ public class DeliveryService {
     private final InventoryBalanceMapper balanceMapper;
     private final StockLedgerMapper ledgerMapper;
     private final MaterialMapper materialMapper;
+    private final BatchService batchService;
 
     public DeliveryService(DeliveryMapper deliveryMapper,
                            DeliveryLineMapper deliveryLineMapper,
@@ -59,7 +61,8 @@ public class DeliveryService {
                            SalesOrderLineMapper orderLineMapper,
                            InventoryBalanceMapper balanceMapper,
                            StockLedgerMapper ledgerMapper,
-                           MaterialMapper materialMapper) {
+                           MaterialMapper materialMapper,
+                           BatchService batchService) {
         this.deliveryMapper = deliveryMapper;
         this.deliveryLineMapper = deliveryLineMapper;
         this.outboundMapper = outboundMapper;
@@ -69,6 +72,7 @@ public class DeliveryService {
         this.balanceMapper = balanceMapper;
         this.ledgerMapper = ledgerMapper;
         this.materialMapper = materialMapper;
+        this.batchService = batchService;
     }
 
     public IPage<DeliveryView> page(long current, long size, String keyword, Integer status) {
@@ -134,6 +138,8 @@ public class DeliveryService {
             line.setDeliveryId(delivery.getId());
             line.setOrderLineId(orderLine.getId());
             line.setMaterialId(orderLine.getMaterialId());
+            Batch batch = batchService.requireForIssue(orderLine.getMaterialId(), lineRequest.batchId());
+            line.setBatchId(batch == null ? null : batch.getId());
             line.setQuantity(lineRequest.quantity());
             line.setTaxUnitPrice(orderLine.getTaxUnitPrice());
             line.setTaxRate(orderLine.getTaxRate());
@@ -177,17 +183,20 @@ public class DeliveryService {
         outboundMapper.insert(outbound);
 
         for (DeliveryLine line : lines) {
-            int updated = balanceMapper.deduct(line.getMaterialId(), delivery.getWarehouseId(), line.getQuantity());
+            int updated = balanceMapper.deduct(line.getMaterialId(), delivery.getWarehouseId(),
+                    line.getBatchId(), line.getQuantity());
             if (updated == 0) {
                 Material material = materialMapper.selectById(line.getMaterialId());
                 String code = material == null ? String.valueOf(line.getMaterialId()) : material.getCode();
-                throw new BusinessException(HttpStatus.CONFLICT, "物料 " + code + " 库存不足");
+                throw new BusinessException(HttpStatus.CONFLICT, "物料 " + code + " 库存不足"
+                        + (line.getBatchId() == null ? "" : "（批次不足）"));
             }
 
             OutboundLine outboundLine = new OutboundLine();
             outboundLine.setOutboundId(outbound.getId());
             outboundLine.setDeliveryLineId(line.getId());
             outboundLine.setMaterialId(line.getMaterialId());
+            outboundLine.setBatchId(line.getBatchId());
             outboundLine.setQuantity(line.getQuantity());
             outboundLine.setTaxUnitPrice(line.getTaxUnitPrice());
             outboundLine.setAmount(line.getAmount());
@@ -195,6 +204,7 @@ public class DeliveryService {
 
             StockLedger ledger = new StockLedger();
             ledger.setMaterialId(line.getMaterialId());
+            ledger.setBatchId(line.getBatchId());
             ledger.setWarehouseId(delivery.getWarehouseId());
             ledger.setBizType("SALES_OUT");
             ledger.setDirection(-1);
