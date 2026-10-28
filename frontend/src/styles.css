@@ -102,6 +102,20 @@ body {
   text-align: right;
 }
 
+.ledger-total {
+  margin-top: 6px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.ledger-total-in {
+  color: #389e0d;
+}
+
+.ledger-total-out {
+  color: #d46b08;
+}
+
 .tab-toolbar {
   display: flex;
   justify-content: flex-end;

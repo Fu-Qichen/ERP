@@ -16,7 +16,10 @@ import { Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import DashboardPage from './pages/DashboardPage'
 import DeliveriesPage from './pages/DeliveriesPage'
 import InventoryPage from './pages/InventoryPage'
+import InboundsPage from './pages/InboundsPage'
 import InvoicesPage from './pages/InvoicesPage'
+import LedgerPage from './pages/LedgerPage'
+import OutboundsPage from './pages/OutboundsPage'
 import MaterialsPage from './pages/MaterialsPage'
 import OrganizationPage from './pages/OrganizationPage'
 import PartnersPage from './pages/PartnersPage'
@@ -31,6 +34,9 @@ const { Header, Sider, Content } = Layout
 
 const routes: { path: string; key: string }[] = [
   { path: '/purchase-receipts', key: '/purchase-receipts' },
+  { path: '/inbounds', key: '/inbounds' },
+  { path: '/outbounds', key: '/outbounds' },
+  { path: '/ledger', key: '/ledger' },
   { path: '/purchase-finance', key: '/purchase-finance' },
   { path: '/purchase', key: '/purchase' },
   { path: '/deliveries', key: '/deliveries' },
@@ -115,6 +121,21 @@ const menuItems: MenuProps['items'] = [
         key: '/inventory',
         icon: <FundOutlined />,
         label: <NavLink to="/inventory">库存余额</NavLink>,
+      },
+      {
+        key: '/inbounds',
+        icon: <InboxOutlined />,
+        label: <NavLink to="/inbounds">采购入库单</NavLink>,
+      },
+      {
+        key: '/outbounds',
+        icon: <SendOutlined />,
+        label: <NavLink to="/outbounds">销售出库单</NavLink>,
+      },
+      {
+        key: '/ledger',
+        icon: <FileTextOutlined />,
+        label: <NavLink to="/ledger">库存流水</NavLink>,
       },
       {
         key: '/warehouses',
@@ -217,6 +238,9 @@ export default function App() {
             <Route path="/purchase-receipts" element={<PurchaseReceiptsPage />} />
             <Route path="/purchase-finance" element={<PurchaseFinancePage />} />
             <Route path="/inventory" element={<InventoryPage />} />
+            <Route path="/inbounds" element={<InboundsPage />} />
+            <Route path="/outbounds" element={<OutboundsPage />} />
+            <Route path="/ledger" element={<LedgerPage />} />
             <Route path="/warehouses" element={<WarehousesPage />} />
             <Route path="/partners" element={<PartnersPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />

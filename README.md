@@ -34,6 +34,7 @@ export DB_PASSWORD=postgres
 - `V8__invoice_receivable.sql`：发货明细补价格字段，新增销售发票/发票明细/应收单。
 - `V9__receipt_writeoff.sql`：新增收款单、收款核销明细。
 - `V10__purchase_chain.sql`：采购订单改审核状态，新增收货单、入库单、采购发票、应付单、付款单及核销明细；历史已入库订单迁移为收货/入库单。
+- `V11__outbound_line.sql`：新增销售出库明细 `so_outbound_line`，历史出库单按发货明细回填。
 
 核心表：`md_material`、`org_dept`、`org_staff`、`md_customer_class`、`md_supplier_class`、`md_currency`、`md_settle_method`、`md_pay_condition`、`md_customer`、`md_supplier`、`inv_warehouse`、`inv_balance`、`inv_ledger`、`so_order`、`so_order_line`、`po_order`、`po_order_line`。
 
@@ -84,6 +85,9 @@ pnpm build
 | 财务 | `/receipts` | 收款与核销：登记收款、核销应收 |
 | 财务 | `/purchase-finance` | 采购发票与应付：开票、应付单、付款核销 |
 | 库存 | `/inventory` | 库存余额与缺货提示 |
+| 库存 | `/inbounds` | 采购入库单：单号、收货单、明细、过账时间 |
+| 库存 | `/outbounds` | 销售出库单：单号、发货单、明细、过账时间 |
+| 库存 | `/ledger` | 库存流水：按物料/仓库/业务类型过滤，出入库合计 |
 | 库存 | `/warehouses` | 仓库 CRUD 与所属部门 |
 | 库存 | `/materials` | 物料分页、关键字查询、CRUD |
 | 基础资料 | `/organization` | 部门树、员工档案 CRUD |
@@ -122,6 +126,11 @@ pnpm build
 | GET/POST | `/api/warehouses` | 仓库列表 / 新增 |
 | PUT/DELETE | `/api/warehouses/{id}` | 更新 / 删除仓库 |
 | GET | `/api/inventory?warehouseId=` | 库存余额 |
+| GET | `/api/outbounds?current=1&size=10&keyword=` | 销售出库单分页 |
+| GET | `/api/outbounds/{id}` | 销售出库单详情（含明细） |
+| GET | `/api/inbounds?current=1&size=10&keyword=` | 采购入库单分页 |
+| GET | `/api/inbounds/{id}` | 采购入库单详情（含明细） |
+| GET | `/api/ledger?current=1&size=20&materialId=&warehouseId=&bizType=` | 库存流水分页 |
 | GET | `/api/sales-orders?current=1&size=10&status=` | 销售订单分页 |
 | GET | `/api/sales-orders/{id}` | 订单详情（含明细） |
 | POST | `/api/sales-orders` | 新增草稿订单，不扣库存 |
