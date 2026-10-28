@@ -2,7 +2,6 @@ package com.jxbs.erp.demo.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.jxbs.erp.demo.domain.Batch;
 import com.jxbs.erp.demo.domain.Bom;
 import com.jxbs.erp.demo.domain.BomLine;
 import com.jxbs.erp.demo.domain.Material;
@@ -49,7 +48,6 @@ public class WorkOrderService {
     private final WarehouseMapper warehouseMapper;
     private final InventoryBalanceMapper balanceMapper;
     private final StockLedgerMapper ledgerMapper;
-    private final BatchService batchService;
 
     public WorkOrderService(WorkOrderMapper workOrderMapper,
                             MaterialIssueMapper issueMapper,
@@ -59,8 +57,7 @@ public class WorkOrderService {
                             MaterialMapper materialMapper,
                             WarehouseMapper warehouseMapper,
                             InventoryBalanceMapper balanceMapper,
-                            StockLedgerMapper ledgerMapper,
-                            BatchService batchService) {
+                            StockLedgerMapper ledgerMapper) {
         this.workOrderMapper = workOrderMapper;
         this.issueMapper = issueMapper;
         this.reportMapper = reportMapper;
@@ -70,7 +67,6 @@ public class WorkOrderService {
         this.warehouseMapper = warehouseMapper;
         this.balanceMapper = balanceMapper;
         this.ledgerMapper = ledgerMapper;
-        this.batchService = batchService;
     }
 
     public IPage<WorkOrderView> page(long current, long size, String keyword, Integer status) {
@@ -162,11 +158,8 @@ public class WorkOrderService {
             if (material == null) {
                 throw new BusinessException(HttpStatus.BAD_REQUEST, "物料不存在：" + line.materialId());
             }
-            Batch batch = batchService.requireForIssue(line.materialId(), line.batchId());
-            Long batchId = batch == null ? null : batch.getId();
-            if (balanceMapper.deduct(line.materialId(), order.getWarehouseId(), batchId, line.qty()) == 0) {
-                throw new BusinessException(HttpStatus.CONFLICT, "物料 " + material.getCode() + " 库存不足"
-                        + (batchId == null ? "" : "（批次不足）"));
+            if (balanceMapper.deduct(line.materialId(), order.getWarehouseId(), line.qty()) == 0) {
+                throw new BusinessException(HttpStatus.CONFLICT, "物料 " + material.getCode() + " 库存不足");
             }
 
             MaterialIssue issue = new MaterialIssue();
@@ -174,14 +167,12 @@ public class WorkOrderService {
             issue.setWorkOrderId(order.getId());
             issue.setWarehouseId(order.getWarehouseId());
             issue.setMaterialId(line.materialId());
-            issue.setBatchId(batchId);
             issue.setQty(line.qty());
             issue.setCreatedAt(LocalDateTime.now());
             issueMapper.insert(issue);
 
             StockLedger ledger = new StockLedger();
             ledger.setMaterialId(line.materialId());
-            ledger.setBatchId(batchId);
             ledger.setWarehouseId(order.getWarehouseId());
             ledger.setBizType("PRODUCTION_ISSUE");
             ledger.setDirection(-1);
@@ -200,7 +191,7 @@ public class WorkOrderService {
      * 生产报工：成品入库并写流水，累计完工数量，达到计划数量自动完工。
      */
     @Transactional
-    public WorkOrderView report(Long id, BigDecimal qty, String batchNo) {
+    public WorkOrderView report(Long id, BigDecimal qty) {
         WorkOrder order = workOrderMapper.selectByIdForUpdate(id);
         if (order == null) {
             throw new BusinessException(HttpStatus.NOT_FOUND, "生产工单不存在");
@@ -212,9 +203,7 @@ public class WorkOrderService {
             throw new BusinessException(HttpStatus.CONFLICT, "工单已完工，不能继续报工");
         }
 
-        Batch batch = batchService.resolveForStock(order.getProductId(), batchNo, "WO", order.getId());
-        Long batchId = batch == null ? null : batch.getId();
-        balanceMapper.addStock(order.getProductId(), order.getWarehouseId(), batchId, qty);
+        balanceMapper.addStock(order.getProductId(), order.getWarehouseId(), qty);
 
         ProductionReport report = new ProductionReport();
         report.setReportNo(nextReportNo());
@@ -222,13 +211,11 @@ public class WorkOrderService {
         report.setWarehouseId(order.getWarehouseId());
         report.setProductId(order.getProductId());
         report.setQty(qty);
-        report.setBatchId(batchId);
         report.setCreatedAt(LocalDateTime.now());
         reportMapper.insert(report);
 
         StockLedger ledger = new StockLedger();
         ledger.setMaterialId(order.getProductId());
-        ledger.setBatchId(batchId);
         ledger.setWarehouseId(order.getWarehouseId());
         ledger.setBizType("PRODUCTION_IN");
         ledger.setDirection(1);

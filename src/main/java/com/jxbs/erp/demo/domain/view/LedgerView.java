@@ -17,8 +17,6 @@ public class LedgerView {
     private String sourceType;
     private Long sourceId;
     private String sourceNo;
-    private Long batchId;
-    private String batchNo;
     private LocalDateTime occurredAt;
     private String remark;
 
@@ -132,21 +130,5 @@ public class LedgerView {
 
     public void setRemark(String remark) {
         this.remark = remark;
-    }
-
-    public Long getBatchId() {
-        return batchId;
-    }
-
-    public void setBatchId(Long batchId) {
-        this.batchId = batchId;
-    }
-
-    public String getBatchNo() {
-        return batchNo;
-    }
-
-    public void setBatchNo(String batchNo) {
-        this.batchNo = batchNo;
     }
 }

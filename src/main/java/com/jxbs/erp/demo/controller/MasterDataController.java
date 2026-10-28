@@ -20,8 +20,7 @@ public class MasterDataController {
     }
 
     @GetMapping("/inventory")
-    public List<InventoryView> inventory(@RequestParam(required = false) Long warehouseId,
-                                         @RequestParam(required = false) Long materialId) {
-        return balanceMapper.selectViews(warehouseId, materialId);
+    public List<InventoryView> inventory(@RequestParam(required = false) Long warehouseId) {
+        return balanceMapper.selectViews(warehouseId);
     }
 }

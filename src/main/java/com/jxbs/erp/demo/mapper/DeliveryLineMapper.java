@@ -16,15 +16,12 @@ public interface DeliveryLineMapper extends BaseMapper<DeliveryLine> {
                    l.material_id,
                    m.code AS material_code,
                    m.name AS material_name,
-                   l.batch_id,
-                   bt.batch_no,
                    l.quantity,
                    l.tax_unit_price,
                    l.tax_rate,
                    l.amount
             FROM so_delivery_line l
             JOIN md_material m ON m.id = l.material_id
-            LEFT JOIN inv_batch bt ON bt.id = l.batch_id
             WHERE l.delivery_id = #{deliveryId}
             ORDER BY l.id
             """)

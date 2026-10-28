@@ -21,7 +21,6 @@ public interface MaterialMapper extends BaseMapper<Material> {
                    m.uom_id,
                    u.unit_code,
                    u.unit_name,
-                   m.batch_mode,
                    m.status,
                    m.created_at,
                    m.updated_at
@@ -52,7 +51,6 @@ public interface MaterialMapper extends BaseMapper<Material> {
                    m.uom_id,
                    u.unit_code,
                    u.unit_name,
-                   m.batch_mode,
                    m.status,
                    m.created_at,
                    m.updated_at

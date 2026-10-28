@@ -13,34 +13,25 @@ import java.util.List;
 
 public interface InventoryBalanceMapper extends BaseMapper<InventoryBalance> {
 
-    /**
-     * 条件扣减：库存不足时返回 0。按批次维度定位余额行，非批次物料 batchId 为空。
-     */
     @Update("""
             UPDATE inv_balance
             SET qty = qty - #{qty}, updated_at = now()
             WHERE material_id = #{materialId}
               AND warehouse_id = #{warehouseId}
-              AND COALESCE(batch_id, 0) = COALESCE(#{batchId}, 0)
               AND qty >= #{qty}
             """)
     int deduct(@Param("materialId") Long materialId,
                @Param("warehouseId") Long warehouseId,
-               @Param("batchId") Long batchId,
                @Param("qty") BigDecimal qty);
 
-    /**
-     * 入库累加：不存在则插入。冲突键是 (material_id, warehouse_id, COALESCE(batch_id, 0)) 唯一索引。
-     */
     @Insert("""
-            INSERT INTO inv_balance (material_id, warehouse_id, batch_id, qty, locked_qty)
-            VALUES (#{materialId}, #{warehouseId}, #{batchId}, #{qty}, 0)
-            ON CONFLICT (material_id, warehouse_id, COALESCE(batch_id, 0))
+            INSERT INTO inv_balance (material_id, warehouse_id, qty, locked_qty)
+            VALUES (#{materialId}, #{warehouseId}, #{qty}, 0)
+            ON CONFLICT (material_id, warehouse_id)
             DO UPDATE SET qty = inv_balance.qty + EXCLUDED.qty, updated_at = now()
             """)
     int addStock(@Param("materialId") Long materialId,
                  @Param("warehouseId") Long warehouseId,
-                 @Param("batchId") Long batchId,
                  @Param("qty") BigDecimal qty);
 
     @Select("""
@@ -52,21 +43,15 @@ public interface InventoryBalanceMapper extends BaseMapper<InventoryBalance> {
                    b.warehouse_id,
                    w.warehouse_name,
                    b.qty,
-                   b.locked_qty,
-                   b.batch_id,
-                   bt.batch_no,
-                   bt.expire_date
+                   b.locked_qty
             FROM inv_balance b
             JOIN md_material m ON m.id = b.material_id
             JOIN inv_warehouse w ON w.id = b.warehouse_id
-            LEFT JOIN inv_batch bt ON bt.id = b.batch_id
             <where>
                 <if test="warehouseId != null">b.warehouse_id = #{warehouseId}</if>
-                <if test="materialId != null">b.material_id = #{materialId}</if>
             </where>
-            ORDER BY m.code, bt.expire_date NULLS LAST
+            ORDER BY m.code
             </script>
             """)
-    List<InventoryView> selectViews(@Param("warehouseId") Long warehouseId,
-                                    @Param("materialId") Long materialId);
+    List<InventoryView> selectViews(@Param("warehouseId") Long warehouseId);
 }

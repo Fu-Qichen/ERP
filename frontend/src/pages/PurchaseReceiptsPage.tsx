@@ -39,7 +39,6 @@ import {
 interface ReceiptLineForm {
   orderLineId: number
   quantity: number
-  batchNo?: string
 }
 
 interface ReceiptFormValues {
@@ -401,19 +400,10 @@ export default function PurchaseReceiptsPage() {
                   },
                   {
                     title: '收货数量',
-                    width: 160,
+                    width: 180,
                     render: (_, field) => (
                       <Form.Item noStyle name={[field.name, 'quantity']} rules={[{ required: true }]}>
                         <InputNumber min={0.000001} precision={6} style={{ width: '100%' }} />
-                      </Form.Item>
-                    ),
-                  },
-                  {
-                    title: '批次号（批次物料必填）',
-                    width: 200,
-                    render: (_, field) => (
-                      <Form.Item noStyle name={[field.name, 'batchNo']}>
-                        <Input placeholder="如 B20261101，留空则不给批次物料入库" />
                       </Form.Item>
                     ),
                   },

@@ -141,9 +141,6 @@ export interface InventoryBalance {
   warehouseName: string
   qty: string
   lockedQty: string
-  batchId: number | null
-  batchNo: string | null
-  expireDate: string | null
 }
 
 export function listCustomers() {

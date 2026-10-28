@@ -73,12 +73,6 @@ export default function LedgerPage() {
     { title: '物料名称', dataIndex: 'materialName', width: 160 },
     { title: '仓库', dataIndex: 'warehouseName', width: 110 },
     {
-      title: '批次',
-      dataIndex: 'batchNo',
-      width: 150,
-      render: (value: string | null) => value || <span style={{ color: '#bfbfbf' }}>-</span>,
-    },
-    {
       title: '业务类型',
       dataIndex: 'bizType',
       width: 130,

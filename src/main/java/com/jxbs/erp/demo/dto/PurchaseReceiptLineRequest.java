@@ -11,10 +11,6 @@ public record PurchaseReceiptLineRequest(
 
         @NotNull(message = "收货数量不能为空")
         @DecimalMin(value = "0.000001", message = "收货数量必须大于 0")
-        BigDecimal quantity,
-
-        Long batchId,
-
-        String batchNo
+        BigDecimal quantity
 ) {
 }

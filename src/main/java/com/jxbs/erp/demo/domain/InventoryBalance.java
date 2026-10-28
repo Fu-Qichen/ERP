@@ -14,7 +14,6 @@ public class InventoryBalance {
     private Long id;
     private Long materialId;
     private Long warehouseId;
-    private Long batchId;
     private BigDecimal qty;
     private BigDecimal lockedQty;
     private LocalDateTime updatedAt;
@@ -41,14 +40,6 @@ public class InventoryBalance {
 
     public void setWarehouseId(Long warehouseId) {
         this.warehouseId = warehouseId;
-    }
-
-    public Long getBatchId() {
-        return batchId;
-    }
-
-    public void setBatchId(Long batchId) {
-        this.batchId = batchId;
     }
 
     public BigDecimal getQty() {

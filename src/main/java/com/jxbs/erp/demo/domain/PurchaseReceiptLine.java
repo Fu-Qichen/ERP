@@ -14,7 +14,6 @@ public class PurchaseReceiptLine {
     private Long receiptId;
     private Long orderLineId;
     private Long materialId;
-    private Long batchId;
     private BigDecimal quantity;
     private BigDecimal taxUnitPrice;
     private BigDecimal taxRate;
@@ -50,14 +49,6 @@ public class PurchaseReceiptLine {
 
     public void setMaterialId(Long materialId) {
         this.materialId = materialId;
-    }
-
-    public Long getBatchId() {
-        return batchId;
-    }
-
-    public void setBatchId(Long batchId) {
-        this.batchId = batchId;
     }
 
     public BigDecimal getQuantity() {

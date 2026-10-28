@@ -2,7 +2,6 @@ import {
   ApartmentOutlined,
   AppstoreOutlined,
   AuditOutlined,
-  ClusterOutlined,
   DatabaseOutlined,
   ExperimentOutlined,
   FileTextOutlined,
@@ -21,7 +20,6 @@ import BomPage from './pages/BomPage'
 import DashboardPage from './pages/DashboardPage'
 import DeliveriesPage from './pages/DeliveriesPage'
 import InventoryPage from './pages/InventoryPage'
-import BatchesPage from './pages/BatchesPage'
 import InboundsPage from './pages/InboundsPage'
 import InvoicesPage from './pages/InvoicesPage'
 import LedgerPage from './pages/LedgerPage'
@@ -49,7 +47,6 @@ const routes: { path: string; key: string }[] = [
   { path: '/purchase-receipts', key: '/purchase-receipts' },
   { path: '/inbounds', key: '/inbounds' },
   { path: '/outbounds', key: '/outbounds' },
-  { path: '/batches', key: '/batches' },
   { path: '/ledger', key: '/ledger' },
   { path: '/reconcile', key: '/reconcile' },
   { path: '/purchase-finance', key: '/purchase-finance' },
@@ -181,11 +178,6 @@ const menuItems: MenuProps['items'] = [
         label: <NavLink to="/reconcile">库存对账</NavLink>,
       },
       {
-        key: '/batches',
-        icon: <ClusterOutlined />,
-        label: <NavLink to="/batches">批次档案</NavLink>,
-      },
-      {
         key: '/warehouses',
         icon: <HomeOutlined />,
         label: <NavLink to="/warehouses">仓库管理</NavLink>,
@@ -308,7 +300,6 @@ export default function App() {
             <Route path="/outbounds" element={<OutboundsPage />} />
             <Route path="/ledger" element={<LedgerPage />} />
             <Route path="/reconcile" element={<ReconcilePage />} />
-            <Route path="/batches" element={<BatchesPage />} />
             <Route path="/warehouses" element={<WarehousesPage />} />
             <Route path="/partners" element={<PartnersPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />

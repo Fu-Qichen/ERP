@@ -35,9 +35,8 @@ public class StockReportController {
     public ResponseEntity<byte[]> exportLedger(@RequestParam(required = false) Long materialId,
                                                @RequestParam(required = false) Long warehouseId,
                                                @RequestParam(required = false) String bizType,
-                                               @RequestParam(required = false) Long batchId,
                                                @RequestParam(required = false) String keyword) {
-        byte[] content = reportService.exportLedger(materialId, warehouseId, bizType, batchId, keyword);
+        byte[] content = reportService.exportLedger(materialId, warehouseId, bizType, keyword);
         String filename = reportService.ledgerFileName();
         return ResponseEntity.ok()
                 .contentType(XLSX)

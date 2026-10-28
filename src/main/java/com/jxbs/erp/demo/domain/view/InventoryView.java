@@ -1,7 +1,6 @@
 package com.jxbs.erp.demo.domain.view;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 public class InventoryView {
 
@@ -13,9 +12,6 @@ public class InventoryView {
     private String warehouseName;
     private BigDecimal qty;
     private BigDecimal lockedQty;
-    private Long batchId;
-    private String batchNo;
-    private LocalDate expireDate;
 
     public Long getId() {
         return id;
@@ -79,29 +75,5 @@ public class InventoryView {
 
     public void setLockedQty(BigDecimal lockedQty) {
         this.lockedQty = lockedQty;
-    }
-
-    public Long getBatchId() {
-        return batchId;
-    }
-
-    public void setBatchId(Long batchId) {
-        this.batchId = batchId;
-    }
-
-    public String getBatchNo() {
-        return batchNo;
-    }
-
-    public void setBatchNo(String batchNo) {
-        this.batchNo = batchNo;
-    }
-
-    public LocalDate getExpireDate() {
-        return expireDate;
-    }
-
-    public void setExpireDate(LocalDate expireDate) {
-        this.expireDate = expireDate;
     }
 }

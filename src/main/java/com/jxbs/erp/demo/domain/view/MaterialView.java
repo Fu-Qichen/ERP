@@ -14,7 +14,6 @@ public class MaterialView {
     private Long uomId;
     private String unitCode;
     private String unitName;
-    private Integer batchMode;
     private Integer status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -97,14 +96,6 @@ public class MaterialView {
 
     public void setUnitName(String unitName) {
         this.unitName = unitName;
-    }
-
-    public Integer getBatchMode() {
-        return batchMode;
-    }
-
-    public void setBatchMode(Integer batchMode) {
-        this.batchMode = batchMode;
     }
 
     public Integer getStatus() {

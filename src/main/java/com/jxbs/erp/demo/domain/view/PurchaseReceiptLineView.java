@@ -9,8 +9,6 @@ public class PurchaseReceiptLineView {
     private Long materialId;
     private String materialCode;
     private String materialName;
-    private Long batchId;
-    private String batchNo;
     private BigDecimal quantity;
     private BigDecimal taxUnitPrice;
     private BigDecimal taxRate;
@@ -54,22 +52,6 @@ public class PurchaseReceiptLineView {
 
     public void setMaterialName(String materialName) {
         this.materialName = materialName;
-    }
-
-    public Long getBatchId() {
-        return batchId;
-    }
-
-    public void setBatchId(Long batchId) {
-        this.batchId = batchId;
-    }
-
-    public String getBatchNo() {
-        return batchNo;
-    }
-
-    public void setBatchNo(String batchNo) {
-        this.batchNo = batchNo;
     }
 
     public BigDecimal getQuantity() {

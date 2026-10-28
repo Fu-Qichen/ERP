@@ -18,7 +18,6 @@ public class Material {
     private String spec;
     private Long classId;
     private Long uomId;
-    private Integer batchMode;
     private Integer status;
 
     @TableField(value = "created_at", fill = FieldFill.INSERT)
@@ -73,14 +72,6 @@ public class Material {
 
     public void setUomId(Long uomId) {
         this.uomId = uomId;
-    }
-
-    public Integer getBatchMode() {
-        return batchMode;
-    }
-
-    public void setBatchMode(Integer batchMode) {
-        this.batchMode = batchMode;
     }
 
     public Integer getStatus() {

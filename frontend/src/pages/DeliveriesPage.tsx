@@ -22,7 +22,6 @@ import {
 import { PlusOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons'
 import dayjs, { type Dayjs } from 'dayjs'
 import { useState } from 'react'
-import OrderLineBatchSelect from '../components/OrderLineBatchSelect'
 import {
   createDelivery,
   getDelivery,
@@ -40,7 +39,6 @@ import {
 interface DeliveryLineForm {
   orderLineId: number
   quantity: number
-  batchId?: number
 }
 
 interface DeliveryFormValues {
@@ -391,28 +389,12 @@ export default function DeliveriesPage() {
                   },
                   {
                     title: '发货数量',
-                    width: 160,
+                    width: 180,
                     render: (_, field) => (
                       <Form.Item noStyle name={[field.name, 'quantity']} rules={[{ required: true }]}>
                         <InputNumber min={0.000001} precision={6} style={{ width: '100%' }} />
                       </Form.Item>
                     ),
-                  },
-                  {
-                    title: '批次（批次物料必填）',
-                    width: 260,
-                    render: (_, field) => {
-                      const lineId = form.getFieldValue(['lines', field.name, 'orderLineId'])
-                      const orderLine = pendingLines.find((item) => item.id === lineId)
-                      return (
-                        <Form.Item noStyle name={[field.name, 'batchId']}>
-                          <OrderLineBatchSelect
-                            materialId={orderLine?.materialId}
-                            warehouseId={orderDetail.data?.warehouseId}
-                          />
-                        </Form.Item>
-                      )
-                    },
                   },
                 ]}
               />

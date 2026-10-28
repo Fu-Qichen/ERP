@@ -9,8 +9,6 @@ public class ReconcileRowView {
     private String materialName;
     private Long warehouseId;
     private String warehouseName;
-    private Long batchId;
-    private String batchNo;
     private BigDecimal balanceQty;
     private BigDecimal ledgerQty;
     private BigDecimal diffQty;
@@ -54,22 +52,6 @@ public class ReconcileRowView {
 
     public void setWarehouseName(String warehouseName) {
         this.warehouseName = warehouseName;
-    }
-
-    public Long getBatchId() {
-        return batchId;
-    }
-
-    public void setBatchId(Long batchId) {
-        this.batchId = batchId;
-    }
-
-    public String getBatchNo() {
-        return batchNo;
-    }
-
-    public void setBatchNo(String batchNo) {
-        this.batchNo = batchNo;
     }
 
     public BigDecimal getBalanceQty() {

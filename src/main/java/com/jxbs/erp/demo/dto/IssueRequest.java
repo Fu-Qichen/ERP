@@ -19,9 +19,7 @@ public record IssueRequest(
 
             @NotNull(message = "领料数量不能为空")
             @DecimalMin(value = "0.000001", message = "领料数量必须大于 0")
-            BigDecimal qty,
-
-            Long batchId
+            BigDecimal qty
     ) {
     }
 }

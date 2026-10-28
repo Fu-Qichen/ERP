@@ -97,7 +97,6 @@ public class MaterialController {
         material.setClassId(request.classId());
         material.setUomId(request.uomId());
         material.setStatus(request.status() == null ? 1 : request.status());
-        material.setBatchMode(request.batchMode() == null ? 0 : request.batchMode());
     }
 
     private void validateRefs(MaterialRequest request) {

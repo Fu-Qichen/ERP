@@ -20,7 +20,6 @@ public class LedgerService {
                                   Long materialId,
                                   Long warehouseId,
                                   String bizType,
-                                  Long batchId,
                                   String keyword) {
         long safeSize = Math.min(Math.max(size, 1), 100);
         return ledgerMapper.selectPageViews(
@@ -28,7 +27,6 @@ public class LedgerService {
                 materialId,
                 warehouseId,
                 bizType,
-                batchId,
                 keyword
         );
     }
