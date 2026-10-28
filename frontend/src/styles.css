@@ -102,6 +102,19 @@ body {
   text-align: right;
 }
 
+.statistic-caption {
+  margin-bottom: 4px;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.dashboard-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 0;
+}
+
 .ledger-total {
   margin-top: 6px;
   font-size: 20px;
