@@ -1,0 +1,228 @@
+import {
+  ApartmentOutlined,
+  AppstoreOutlined,
+  DatabaseOutlined,
+  FileTextOutlined,
+  FundOutlined,
+  HomeOutlined,
+  InboxOutlined,
+  SendOutlined,
+  ShoppingCartOutlined,
+  TeamOutlined,
+  WalletOutlined,
+} from '@ant-design/icons'
+import { Layout, Menu, Typography, type MenuProps } from 'antd'
+import { Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom'
+import DashboardPage from './pages/DashboardPage'
+import DeliveriesPage from './pages/DeliveriesPage'
+import InventoryPage from './pages/InventoryPage'
+import InvoicesPage from './pages/InvoicesPage'
+import MaterialsPage from './pages/MaterialsPage'
+import OrganizationPage from './pages/OrganizationPage'
+import PartnersPage from './pages/PartnersPage'
+import PurchaseFinancePage from './pages/PurchaseFinancePage'
+import PurchaseOrdersPage from './pages/PurchaseOrdersPage'
+import PurchaseReceiptsPage from './pages/PurchaseReceiptsPage'
+import ReceiptsPage from './pages/ReceiptsPage'
+import SalesOrdersPage from './pages/SalesOrdersPage'
+import WarehousesPage from './pages/WarehousesPage'
+
+const { Header, Sider, Content } = Layout
+
+const routes: { path: string; key: string }[] = [
+  { path: '/purchase-receipts', key: '/purchase-receipts' },
+  { path: '/purchase-finance', key: '/purchase-finance' },
+  { path: '/purchase', key: '/purchase' },
+  { path: '/deliveries', key: '/deliveries' },
+  { path: '/invoices', key: '/invoices' },
+  { path: '/receipts', key: '/receipts' },
+  { path: '/sales', key: '/sales' },
+  { path: '/organization', key: '/organization' },
+  { path: '/materials', key: '/materials' },
+  { path: '/inventory', key: '/inventory' },
+  { path: '/warehouses', key: '/warehouses' },
+  { path: '/partners', key: '/partners' },
+]
+
+const menuItems: MenuProps['items'] = [
+  {
+    key: '/',
+    icon: <AppstoreOutlined />,
+    label: <NavLink to="/">工作台</NavLink>,
+  },
+  {
+    key: 'sales',
+    icon: <ShoppingCartOutlined />,
+    label: '销售',
+    children: [
+      {
+        key: '/sales',
+        icon: <ShoppingCartOutlined />,
+        label: <NavLink to="/sales">销售订单</NavLink>,
+      },
+      {
+        key: '/deliveries',
+        icon: <SendOutlined />,
+        label: <NavLink to="/deliveries">销售发货</NavLink>,
+      },
+    ],
+  },
+  {
+    key: 'purchase',
+    icon: <InboxOutlined />,
+    label: '采购',
+    children: [
+      {
+        key: '/purchase',
+        icon: <ShoppingCartOutlined />,
+        label: <NavLink to="/purchase">采购订单</NavLink>,
+      },
+      {
+        key: '/purchase-receipts',
+        icon: <InboxOutlined />,
+        label: <NavLink to="/purchase-receipts">采购收货</NavLink>,
+      },
+    ],
+  },
+  {
+    key: 'finance',
+    icon: <WalletOutlined />,
+    label: '财务',
+    children: [
+      {
+        key: '/invoices',
+        icon: <FileTextOutlined />,
+        label: <NavLink to="/invoices">销售发票与应收</NavLink>,
+      },
+      {
+        key: '/receipts',
+        icon: <WalletOutlined />,
+        label: <NavLink to="/receipts">收款与核销</NavLink>,
+      },
+      {
+        key: '/purchase-finance',
+        icon: <FileTextOutlined />,
+        label: <NavLink to="/purchase-finance">采购发票与应付</NavLink>,
+      },
+    ],
+  },
+  {
+    key: 'inventory',
+    icon: <FundOutlined />,
+    label: '库存',
+    children: [
+      {
+        key: '/inventory',
+        icon: <FundOutlined />,
+        label: <NavLink to="/inventory">库存余额</NavLink>,
+      },
+      {
+        key: '/warehouses',
+        icon: <HomeOutlined />,
+        label: <NavLink to="/warehouses">仓库管理</NavLink>,
+      },
+      {
+        key: '/materials',
+        icon: <DatabaseOutlined />,
+        label: <NavLink to="/materials">物料管理</NavLink>,
+      },
+    ],
+  },
+  {
+    key: 'master',
+    icon: <TeamOutlined />,
+    label: '基础资料',
+    children: [
+      {
+        key: '/organization',
+        icon: <ApartmentOutlined />,
+        label: <NavLink to="/organization">组织架构</NavLink>,
+      },
+      {
+        key: '/partners',
+        icon: <TeamOutlined />,
+        label: <NavLink to="/partners">客商管理</NavLink>,
+      },
+    ],
+  },
+]
+
+function findSelectedKey(pathname: string) {
+  return routes.find((route) => pathname.startsWith(route.path))?.key ?? '/'
+}
+
+interface MenuGroup {
+  key: string
+  children: { key: string }[]
+}
+
+function isMenuGroup(item: unknown): item is MenuGroup {
+  if (typeof item !== 'object' || item === null) {
+    return false
+  }
+  if (!('key' in item) || !('children' in item)) {
+    return false
+  }
+  return Array.isArray(item.children)
+}
+
+function findOpenKeys(pathname: string) {
+  const selected = findSelectedKey(pathname)
+  return (menuItems ?? [])
+    .filter(isMenuGroup)
+    .filter((group) => group.children.some((child) => child.key === selected))
+    .map((group) => String(group.key))
+}
+
+export default function App() {
+  const location = useLocation()
+  const selectedKey = findSelectedKey(location.pathname)
+  const openKeys = findOpenKeys(location.pathname)
+
+  return (
+    <Layout className="app-shell">
+      <Sider width={208} theme="dark" className="app-sider">
+        <div className="brand">
+          <span className="brand-mark">E</span>
+          <div>
+            <div className="brand-title">ERP Demo</div>
+            <div className="brand-subtitle">Spring Boot 4 · React 19</div>
+          </div>
+        </div>
+        <Menu
+          theme="dark"
+          mode="inline"
+          selectedKeys={[selectedKey]}
+          defaultOpenKeys={openKeys}
+          items={menuItems}
+        />
+      </Sider>
+      <Layout>
+        <Header className="app-header">
+          <Typography.Text strong>企业资源计划演示</Typography.Text>
+          <Typography.Text type="secondary">
+            PostgreSQL 18 · MyBatis-Plus 3.5.17
+          </Typography.Text>
+        </Header>
+        <Content className="app-content">
+          <Routes>
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/organization" element={<OrganizationPage />} />
+            <Route path="/materials" element={<MaterialsPage />} />
+            <Route path="/sales" element={<SalesOrdersPage />} />
+            <Route path="/deliveries" element={<DeliveriesPage />} />
+            <Route path="/invoices" element={<InvoicesPage />} />
+            <Route path="/receipts" element={<ReceiptsPage />} />
+            <Route path="/purchase" element={<PurchaseOrdersPage />} />
+            <Route path="/purchase-receipts" element={<PurchaseReceiptsPage />} />
+            <Route path="/purchase-finance" element={<PurchaseFinancePage />} />
+            <Route path="/inventory" element={<InventoryPage />} />
+            <Route path="/warehouses" element={<WarehousesPage />} />
+            <Route path="/partners" element={<PartnersPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Content>
+      </Layout>
+    </Layout>
+  )
+}

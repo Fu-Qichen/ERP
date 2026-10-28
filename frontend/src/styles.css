@@ -1,0 +1,119 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  color: #1f2329;
+  background: #f5f7fa;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Microsoft YaHei', sans-serif;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-sider {
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.brand {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 20px 18px 22px;
+  color: #fff;
+}
+
+.brand-mark {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  font-weight: 700;
+  color: #1677ff;
+  background: #fff;
+  border-radius: 9px;
+  place-items: center;
+}
+
+.brand-title {
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.brand-subtitle {
+  margin-top: 3px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 24px;
+  background: #fff;
+  border-bottom: 1px solid #e8ebf0;
+}
+
+.app-content {
+  padding: 24px;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.page-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.page-heading .ant-typography {
+  margin: 0;
+}
+
+.next-step-card {
+  margin-top: 16px;
+}
+
+.next-step-card .ant-typography:last-child {
+  margin-bottom: 0;
+}
+
+.order-total-preview {
+  margin-top: 16px;
+  font-size: 14px;
+  text-align: right;
+}
+
+.tab-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 720px) {
+  .app-sider {
+    display: none;
+  }
+
+  .app-content {
+    padding: 16px;
+  }
+}
