@@ -36,6 +36,7 @@ export DB_PASSWORD=postgres
 - `V10__purchase_chain.sql`：采购订单改审核状态，新增收货单、入库单、采购发票、应付单、付款单及核销明细；历史已入库订单迁移为收货/入库单。
 - `V11__outbound_line.sql`：新增销售出库明细 `so_outbound_line`，历史出库单按发货明细回填。
 - `V12__material_class_uom.sql`：新增物料分类 `md_material_class`、计量单位 `md_uom`，物料改为引用 `class_id`/`uom_id`，按原文本单位回填。
+- `V13__bom_work_order.sql`：新增 BOM、BOM 明细、生产工单、生产领料、生产报工。
 
 核心表：`md_material`、`org_dept`、`org_staff`、`md_customer_class`、`md_supplier_class`、`md_currency`、`md_settle_method`、`md_pay_condition`、`md_customer`、`md_supplier`、`inv_warehouse`、`inv_balance`、`inv_ledger`、`so_order`、`so_order_line`、`po_order`、`po_order_line`。
 
@@ -82,6 +83,8 @@ pnpm build
 | 销售 | `/deliveries` | 销售发货：按已审核订单发货、出库扣库存、生成出库单 |
 | 采购 | `/purchase` | 采购订单：查询、新增、审核、关闭、详情 |
 | 采购 | `/purchase-receipts` | 采购收货：按已审核订单收货、入库、生成入库单 |
+| 生产 | `/boms` | 物料清单：成品、版本、子件用量与损耗 |
+| 生产 | `/work-orders` | 生产工单：下达、领料、报工、领料/报工记录 |
 | 财务 | `/invoices` | 销售发票与应收：开票、应收单查询 |
 | 财务 | `/receipts` | 收款与核销：登记收款、核销应收 |
 | 财务 | `/purchase-finance` | 采购发票与应付：开票、应付单、付款核销 |
@@ -137,6 +140,14 @@ pnpm build
 | GET | `/api/inbounds?current=1&size=10&keyword=` | 采购入库单分页 |
 | GET | `/api/inbounds/{id}` | 采购入库单详情（含明细） |
 | GET | `/api/ledger?current=1&size=20&materialId=&warehouseId=&bizType=` | 库存流水分页 |
+| GET/POST | `/api/boms` | BOM 分页 / 新增 |
+| GET/PUT/DELETE | `/api/boms/{id}` | BOM 详情 / 更新 / 删除 |
+| POST | `/api/boms/{id}/status?status=` | BOM 启用停用 |
+| GET/POST | `/api/work-orders` | 工单分页 / 新增 |
+| POST | `/api/work-orders/{id}/release` | 下达工单 |
+| POST | `/api/work-orders/{id}/issue` | 生产领料，扣子件库存 |
+| POST | `/api/work-orders/{id}/report` | 生产报工，成品入库 |
+| GET | `/api/work-orders/{id}/issues`、`/reports` | 领料与报工记录 |
 | GET | `/api/sales-orders?current=1&size=10&status=` | 销售订单分页 |
 | GET | `/api/sales-orders/{id}` | 订单详情（含明细） |
 | POST | `/api/sales-orders` | 新增草稿订单，不扣库存 |
@@ -200,6 +211,14 @@ pnpm build
 - 核销前对每张应收单 `SELECT ... FOR UPDATE`，并用 `WHERE balance >= amount` 原子更新，超额核销返回 409。
 - 核销后 `paid_amount += 核销额`、`balance -= 核销额`；`balance=0` 置为已结清，部分核销置为部分收款。
 - 一次收款可核销多张应收单；并发核销同一张应收单只有一笔成功。
+
+生产与 BOM 规则：
+
+- BOM 的成品与子件必须存在，子件不能是成品本身，同一子件不能重复，`BOM 编码 + 版本` 唯一。
+- 只有启用状态的 BOM 可以下达工单；BOM 被工单引用后不能删除。
+- 工单状态：`0 草稿 → 1 已下达 → 2 已完工`；只有已下达工单可以领料和报工。
+- 领料按子件逐条 `UPDATE ... WHERE qty >= ?` 扣减库存，任一不足整单回滚，流水 `PRODUCTION_ISSUE`、`source_type=WO`。
+- 报工增加成品库存并写 `PRODUCTION_IN` 流水；`finish_qty` 累加且不得超过 `plan_qty`，达到计划自动完工。
 
 采购链路规则（与销售同构）：
 

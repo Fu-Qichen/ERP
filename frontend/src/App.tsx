@@ -2,6 +2,7 @@ import {
   ApartmentOutlined,
   AppstoreOutlined,
   DatabaseOutlined,
+  ExperimentOutlined,
   FileTextOutlined,
   FundOutlined,
   HomeOutlined,
@@ -13,6 +14,7 @@ import {
 } from '@ant-design/icons'
 import { Layout, Menu, Typography, type MenuProps } from 'antd'
 import { Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom'
+import BomPage from './pages/BomPage'
 import DashboardPage from './pages/DashboardPage'
 import DeliveriesPage from './pages/DeliveriesPage'
 import InventoryPage from './pages/InventoryPage'
@@ -30,10 +32,13 @@ import PurchaseReceiptsPage from './pages/PurchaseReceiptsPage'
 import ReceiptsPage from './pages/ReceiptsPage'
 import SalesOrdersPage from './pages/SalesOrdersPage'
 import WarehousesPage from './pages/WarehousesPage'
+import WorkOrdersPage from './pages/WorkOrdersPage'
 
 const { Header, Sider, Content } = Layout
 
 const routes: { path: string; key: string }[] = [
+  { path: '/work-orders', key: '/work-orders' },
+  { path: '/boms', key: '/boms' },
   { path: '/purchase-receipts', key: '/purchase-receipts' },
   { path: '/inbounds', key: '/inbounds' },
   { path: '/outbounds', key: '/outbounds' },
@@ -89,6 +94,23 @@ const menuItems: MenuProps['items'] = [
         key: '/purchase-receipts',
         icon: <InboxOutlined />,
         label: <NavLink to="/purchase-receipts">采购收货</NavLink>,
+      },
+    ],
+  },
+  {
+    key: 'manufacturing',
+    icon: <ExperimentOutlined />,
+    label: '生产',
+    children: [
+      {
+        key: '/boms',
+        icon: <ExperimentOutlined />,
+        label: <NavLink to="/boms">物料清单</NavLink>,
+      },
+      {
+        key: '/work-orders',
+        icon: <SendOutlined />,
+        label: <NavLink to="/work-orders">生产工单</NavLink>,
       },
     ],
   },
@@ -242,6 +264,8 @@ export default function App() {
             <Route path="/deliveries" element={<DeliveriesPage />} />
             <Route path="/invoices" element={<InvoicesPage />} />
             <Route path="/receipts" element={<ReceiptsPage />} />
+            <Route path="/boms" element={<BomPage />} />
+            <Route path="/work-orders" element={<WorkOrdersPage />} />
             <Route path="/purchase" element={<PurchaseOrdersPage />} />
             <Route path="/purchase-receipts" element={<PurchaseReceiptsPage />} />
             <Route path="/purchase-finance" element={<PurchaseFinancePage />} />
